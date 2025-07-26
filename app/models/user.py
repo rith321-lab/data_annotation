@@ -38,5 +38,8 @@ class User(Base):
     last_login = Column(DateTime(timezone=True))
     email_verified_at = Column(DateTime(timezone=True))
     
+    # Audit trails
+    audit_trails = relationship("AuditTrail", back_populates="user")
+    
     def __repr__(self):
         return f"<User {self.email}>"

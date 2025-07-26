@@ -5,6 +5,10 @@ import { QualityControl } from './components/QualityControl'
 import { ReportsPage } from './components/ReportsPage'
 import { WebhookSettings } from './components/WebhookSettings'
 import { NotificationBell } from './components/NotificationCenter'
+import { CollaborationPanel } from './components/CollaborationPanel'
+import { AnalyticsDashboard } from './components/AnalyticsDashboard'
+import { TaskQueue } from './components/TaskQueue'
+import { AuditTrail } from './components/AuditTrail'
 
 // Icons as simple SVG components
 const BarChart3Icon = () => (
@@ -59,6 +63,43 @@ const SettingsIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="3"/>
     <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3M20.5 7.5L16 12l4.5 4.5M3.5 7.5L8 12l-4.5 4.5M20.5 16.5L16 12l4.5-4.5M3.5 16.5L8 12l-4.5-4.5"/>
+  </svg>
+)
+
+const BrainIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 2a9 9 0 0 0-9 9c0 4 3 7 5 8.5a4.5 4.5 0 0 0 4 0c2-1.5 5-4.5 5-8.5a9 9 0 0 0-9-9z"/>
+    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+    <path d="M9 9h.01M15 9h.01"/>
+  </svg>
+)
+
+const UsersConnectedIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
+  </svg>
+)
+
+const ChartLineIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 3v18h18"/>
+    <path d="m19 9-5 5-4-4-3 3"/>
+  </svg>
+)
+
+const ListChecksIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M10 2v20M14 2v20"/>
+    <path d="M5 7h4M5 12h4M5 17h4M19 7l-2 2 2 2M19 12l-2 2 2 2M19 17l-2 2 2 2"/>
+  </svg>
+)
+
+const HistoryIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+    <path d="M3 3v5h5"/>
+    <path d="M12 7v5l4 2"/>
   </svg>
 )
 
@@ -146,10 +187,15 @@ export default function App() {
     const navItems = [
       { icon: BarChart3Icon, label: 'Projects', active: activeNav === 'Projects' },
       { icon: AwardIcon, label: 'Qualifications' },
-      { icon: CreditCardIcon, label: 'Add funds' },
       { icon: UsersIcon, label: 'Team' },
-      { icon: MailIcon, label: 'Inbox' },
-      { icon: FileTextIcon, label: 'Announcements' },
+      { icon: BrainIcon, label: 'AI Suggestions' },
+      { icon: UsersConnectedIcon, label: 'Collaboration' },
+      { icon: ChartLineIcon, label: 'Analytics' },
+      { icon: ListChecksIcon, label: 'Task Queue' },
+      { icon: HistoryIcon, label: 'Audit Trail' },
+      { icon: FileTextIcon, label: 'Reports' },
+      { icon: MailIcon, label: 'Webhooks' },
+      { icon: SettingsIcon, label: 'Settings' },
     ]
 
     const contributors = [
@@ -235,8 +281,20 @@ export default function App() {
                         setCurrentPage('team')
                       } else if (item.label === 'Qualifications') {
                         setCurrentPage('quality')
-                      } else if (item.label === 'Inbox') {
+                      } else if (item.label === 'Reports') {
                         setCurrentPage('reports')
+                      } else if (item.label === 'Webhooks') {
+                        setCurrentPage('webhooks')
+                      } else if (item.label === 'AI Suggestions') {
+                        setCurrentPage('ai')
+                      } else if (item.label === 'Collaboration') {
+                        setCurrentPage('collaboration')
+                      } else if (item.label === 'Analytics') {
+                        setCurrentPage('analytics')
+                      } else if (item.label === 'Task Queue') {
+                        setCurrentPage('taskqueue')
+                      } else if (item.label === 'Audit Trail') {
+                        setCurrentPage('audit')
                       } else {
                         setCurrentPage('dashboard')
                       }
@@ -334,14 +392,24 @@ export default function App() {
                 margin: 0,
                 fontWeight: '600'
               }}>
-                Projects
+                {activeNav}
               </h1>
               <p style={{ 
                 color: 'rgba(255, 255, 255, 0.8)', 
                 margin: '0.25rem 0 0 0',
                 fontSize: '1rem'
               }}>
-                Data Collection & Analysis
+                {activeNav === 'Projects' ? 'Data Collection & Analysis' :
+                 activeNav === 'Team' ? 'Manage Your Team' :
+                 activeNav === 'Qualifications' ? 'Quality Control Standards' :
+                 activeNav === 'AI Suggestions' ? 'AI-Powered Assistance' :
+                 activeNav === 'Collaboration' ? 'Real-time Collaboration' :
+                 activeNav === 'Analytics' ? 'Advanced Analytics & Insights' :
+                 activeNav === 'Task Queue' ? 'Task Management & Prioritization' :
+                 activeNav === 'Audit Trail' ? 'Track Changes & Version History' :
+                 activeNav === 'Reports' ? 'Generate & Export Reports' :
+                 activeNav === 'Webhooks' ? 'Configure Integrations' :
+                 'Manage Your Workspace'}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -421,6 +489,19 @@ export default function App() {
               <ReportsPage />
             ) : currentPage === 'webhooks' ? (
               <WebhookSettings />
+            ) : currentPage === 'ai' ? (
+              <div style={{ background: 'white', borderRadius: '16px', padding: '2rem' }}>
+                <h2 style={{ margin: '0 0 2rem 0', color: '#1f2937' }}>AI Suggestions</h2>
+                <p style={{ color: '#6b7280' }}>AI-powered suggestions are integrated into annotation interfaces. Navigate to a project to see them in action.</p>
+              </div>
+            ) : currentPage === 'collaboration' ? (
+              <CollaborationPanel />
+            ) : currentPage === 'analytics' ? (
+              <AnalyticsDashboard />
+            ) : currentPage === 'taskqueue' ? (
+              <TaskQueue />
+            ) : currentPage === 'audit' ? (
+              <AuditTrail />
             ) : (
               <>
             {/* Welcome Card */}

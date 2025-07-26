@@ -1,4 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+// Icons for AI features
+const SparklesIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 2L13.09 8.26L19 9L13.45 13.45L15.82 20L12 16L8.18 20L10.55 13.45L5 9L10.91 8.26L12 2Z"/>
+  </svg>
+)
+
+const ThumbsUpIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+  </svg>
+)
+
+const ThumbsDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+  </svg>
+)
 
 // Question type definitions
 export type QuestionType = 
@@ -31,8 +50,65 @@ interface AnnotationInterfaceProps {
   onSubmit: (responses: any) => void
 }
 
-// Individual question components
-const TextClassificationQuestion = ({ question, value, onChange }: any) => (
+interface AISuggestion {
+  label: string
+  confidence: number
+  explanation?: string
+}
+
+// AI Suggestion Component
+const AISuggestionBox = ({ 
+  suggestion, 
+  onAccept, 
+  onReject 
+}: { 
+  suggestion: AISuggestion | null
+  onAccept: () => void
+  onReject: () => void
+}) => {
+  if (!suggestion) return null
+
+  return (
+    <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-2">
+          <SparklesIcon />
+          <div>
+            <p className="text-sm font-medium text-purple-900">AI Suggestion</p>
+            <p className="text-sm text-purple-700 mt-1">
+              <span className="font-medium">{suggestion.label}</span>
+              <span className="text-purple-600 ml-2">
+                ({(suggestion.confidence * 100).toFixed(1)}% confident)
+              </span>
+            </p>
+            {suggestion.explanation && (
+              <p className="text-xs text-purple-600 mt-1">{suggestion.explanation}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={onAccept}
+            className="p-1 text-green-600 hover:bg-green-100 rounded"
+            title="Accept suggestion"
+          >
+            <ThumbsUpIcon />
+          </button>
+          <button
+            onClick={onReject}
+            className="p-1 text-red-600 hover:bg-red-100 rounded"
+            title="Reject suggestion"
+          >
+            <ThumbsDownIcon />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Individual question components with AI support
+const TextClassificationQuestion = ({ question, value, onChange, aiSuggestion }: any) => (
   <div className="space-y-2">
     <label className="block text-sm font-medium text-gray-700">{question.title}</label>
     {question.description && (
@@ -40,7 +116,9 @@ const TextClassificationQuestion = ({ question, value, onChange }: any) => (
     )}
     <div className="space-y-2">
       {question.options?.map((option: string) => (
-        <label key={option} className="flex items-center space-x-2">
+        <label key={option} className={`flex items-center space-x-2 p-2 rounded-lg border ${
+          value === option ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:bg-gray-50'
+        }`}>
           <input
             type="radio"
             value={option}
@@ -49,6 +127,12 @@ const TextClassificationQuestion = ({ question, value, onChange }: any) => (
             className="h-4 w-4 text-purple-600 focus:ring-purple-500"
           />
           <span className="text-sm">{option}</span>
+          {aiSuggestion?.label === option && (
+            <span className="ml-auto text-xs text-purple-600 flex items-center gap-1">
+              <SparklesIcon />
+              AI suggested
+            </span>
+          )}
         </label>
       ))}
     </div>
@@ -71,37 +155,48 @@ const TextGenerationQuestion = ({ question, value, onChange }: any) => (
   </div>
 )
 
-const MultipleChoiceQuestion = ({ question, value, onChange }: any) => (
+const MultipleChoiceQuestion = ({ question, value, onChange, aiSuggestions }: any) => (
   <div className="space-y-2">
     <label className="block text-sm font-medium text-gray-700">{question.title}</label>
     {question.description && (
       <p className="text-sm text-gray-500">{question.description}</p>
     )}
     <div className="space-y-2">
-      {question.options?.map((option: string) => (
-        <label key={option} className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            value={option}
-            checked={value?.includes(option) || false}
-            onChange={(e) => {
-              const newValue = value || []
-              if (e.target.checked) {
-                onChange([...newValue, option])
-              } else {
-                onChange(newValue.filter((v: string) => v !== option))
-              }
-            }}
-            className="h-4 w-4 text-purple-600 focus:ring-purple-500"
-          />
-          <span className="text-sm">{option}</span>
-        </label>
-      ))}
+      {question.options?.map((option: string) => {
+        const suggestion = aiSuggestions?.find((s: any) => s.label === option)
+        return (
+          <label key={option} className={`flex items-center space-x-2 p-2 rounded-lg border ${
+            value?.includes(option) ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:bg-gray-50'
+          }`}>
+            <input
+              type="checkbox"
+              value={option}
+              checked={value?.includes(option) || false}
+              onChange={(e) => {
+                const newValue = value || []
+                if (e.target.checked) {
+                  onChange([...newValue, option])
+                } else {
+                  onChange(newValue.filter((v: string) => v !== option))
+                }
+              }}
+              className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+            />
+            <span className="text-sm">{option}</span>
+            {suggestion && (
+              <span className="ml-auto text-xs text-purple-600 flex items-center gap-1">
+                <SparklesIcon />
+                {(suggestion.confidence * 100).toFixed(0)}%
+              </span>
+            )}
+          </label>
+        )
+      })}
     </div>
   </div>
 )
 
-const ImageClassificationQuestion = ({ question, value, onChange }: any) => (
+const ImageClassificationQuestion = ({ question, value, onChange, aiSuggestion }: any) => (
   <div className="space-y-2">
     <label className="block text-sm font-medium text-gray-700">{question.title}</label>
     {question.description && (
@@ -116,7 +211,9 @@ const ImageClassificationQuestion = ({ question, value, onChange }: any) => (
     </div>
     <div className="space-y-2">
       {question.options?.map((option: string) => (
-        <label key={option} className="flex items-center space-x-2">
+        <label key={option} className={`flex items-center space-x-2 p-2 rounded-lg border ${
+          value === option ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:bg-gray-50'
+        }`}>
           <input
             type="radio"
             value={option}
@@ -125,6 +222,12 @@ const ImageClassificationQuestion = ({ question, value, onChange }: any) => (
             className="h-4 w-4 text-purple-600 focus:ring-purple-500"
           />
           <span className="text-sm">{option}</span>
+          {aiSuggestion?.label === option && (
+            <span className="ml-auto text-xs text-purple-600 flex items-center gap-1">
+              <SparklesIcon />
+              AI suggested ({(aiSuggestion.confidence * 100).toFixed(0)}%)
+            </span>
+          )}
         </label>
       ))}
     </div>
@@ -177,15 +280,77 @@ const RankingQuestion = ({ question, value, onChange }: any) => {
   )
 }
 
-// Main annotation interface component
+// Main annotation interface component with AI support
 export const AnnotationInterface = ({ projectId, taskId, questions, onSubmit }: AnnotationInterfaceProps) => {
   const [responses, setResponses] = useState<Record<string, any>>({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [aiSuggestions, setAiSuggestions] = useState<Record<string, any>>({})
+  const [isLoadingAI, setIsLoadingAI] = useState(false)
+  const [aiEnabled, setAiEnabled] = useState(true)
 
   const currentQuestion = questions[currentQuestionIndex]
 
+  // Fetch AI suggestions when question changes
+  useEffect(() => {
+    if (aiEnabled && currentQuestion && !aiSuggestions[currentQuestion.id]) {
+      fetchAISuggestion(currentQuestion)
+    }
+  }, [currentQuestionIndex, aiEnabled])
+
+  const fetchAISuggestion = async (question: Question) => {
+    setIsLoadingAI(true)
+    try {
+      // Mock AI suggestion - in production, this would call the backend
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const mockSuggestions: Record<string, any> = {
+        'text_classification': {
+          label: question.options?.[0],
+          confidence: 0.85,
+          explanation: "Based on keyword analysis"
+        },
+        'image_classification': {
+          label: question.options?.[1],
+          confidence: 0.92,
+          explanation: "Visual features detected"
+        },
+        'multiple_choice': [
+          { label: question.options?.[0], confidence: 0.78 },
+          { label: question.options?.[2], confidence: 0.65 }
+        ]
+      }
+
+      const suggestion = mockSuggestions[question.type]
+      if (suggestion) {
+        setAiSuggestions({ ...aiSuggestions, [question.id]: suggestion })
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI suggestion:', error)
+    } finally {
+      setIsLoadingAI(false)
+    }
+  }
+
   const handleResponseChange = (questionId: string, value: any) => {
     setResponses({ ...responses, [questionId]: value })
+  }
+
+  const handleAcceptSuggestion = () => {
+    const suggestion = aiSuggestions[currentQuestion.id]
+    if (suggestion) {
+      if (Array.isArray(suggestion)) {
+        // Multiple choice
+        handleResponseChange(currentQuestion.id, suggestion.map(s => s.label))
+      } else {
+        // Single choice
+        handleResponseChange(currentQuestion.id, suggestion.label)
+      }
+    }
+  }
+
+  const handleRejectSuggestion = () => {
+    // Log feedback for model improvement
+    console.log('Suggestion rejected for question:', currentQuestion.id)
   }
 
   const handleNext = () => {
@@ -213,16 +378,17 @@ export const AnnotationInterface = ({ projectId, taskId, questions, onSubmit }: 
   const renderQuestion = (question: Question) => {
     const value = responses[question.id]
     const onChange = (val: any) => handleResponseChange(question.id, val)
+    const aiSuggestion = aiSuggestions[question.id]
 
     switch (question.type) {
       case 'text_classification':
-        return <TextClassificationQuestion question={question} value={value} onChange={onChange} />
+        return <TextClassificationQuestion question={question} value={value} onChange={onChange} aiSuggestion={aiSuggestion} />
       case 'text_generation':
         return <TextGenerationQuestion question={question} value={value} onChange={onChange} />
       case 'multiple_choice':
-        return <MultipleChoiceQuestion question={question} value={value} onChange={onChange} />
+        return <MultipleChoiceQuestion question={question} value={value} onChange={onChange} aiSuggestions={aiSuggestion} />
       case 'image_classification':
-        return <ImageClassificationQuestion question={question} value={value} onChange={onChange} />
+        return <ImageClassificationQuestion question={question} value={value} onChange={onChange} aiSuggestion={aiSuggestion} />
       case 'ranking':
         return <RankingQuestion question={question} value={value} onChange={onChange} />
       default:
@@ -233,16 +399,32 @@ export const AnnotationInterface = ({ projectId, taskId, questions, onSubmit }: 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
+        {/* AI Toggle */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aiEnabled}
+                onChange={(e) => setAiEnabled(e.target.checked)}
+                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700 flex items-center gap-1">
+                <SparklesIcon />
+                AI Assistance
+              </span>
+            </label>
+            {isLoadingAI && (
+              <span className="text-xs text-gray-500">Loading suggestions...</span>
+            )}
+          </div>
+          <div className="text-sm text-gray-500">
+            {currentQuestionIndex + 1} of {questions.length}
+          </div>
+        </div>
+
         {/* Progress bar */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">
-              Question {currentQuestionIndex + 1} of {questions.length}
-            </span>
-            <span className="text-sm text-gray-600">
-              {Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}% Complete
-            </span>
-          </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-purple-600 h-2 rounded-full transition-all duration-300"
@@ -254,6 +436,19 @@ export const AnnotationInterface = ({ projectId, taskId, questions, onSubmit }: 
         {/* Question content */}
         <div className="mb-6">
           {renderQuestion(currentQuestion)}
+          
+          {/* AI Suggestion Box */}
+          {aiEnabled && aiSuggestions[currentQuestion.id] && !responses[currentQuestion.id] && (
+            <AISuggestionBox
+              suggestion={
+                Array.isArray(aiSuggestions[currentQuestion.id]) 
+                  ? aiSuggestions[currentQuestion.id][0]
+                  : aiSuggestions[currentQuestion.id]
+              }
+              onAccept={handleAcceptSuggestion}
+              onReject={handleRejectSuggestion}
+            />
+          )}
         </div>
 
         {/* Navigation buttons */}

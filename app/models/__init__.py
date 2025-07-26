@@ -7,6 +7,7 @@ from app.models.question import Question, QuestionType
 from app.models.response import Response, ResponseValue
 from app.models.worker import Worker, WorkerAssignment
 from app.models.webhook import Webhook, WebhookEvent
+from app.models.audit_trail import AuditTrail, DataVersion
 
 __all__ = [
     "User",
@@ -24,5 +25,7 @@ __all__ = [
     "Worker",
     "WorkerAssignment",
     "Webhook",
-    "WebhookEvent"
+    "WebhookEvent",
+    "AuditTrail",
+    "DataVersion"
 ]
