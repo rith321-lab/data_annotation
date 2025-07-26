@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
 import { ProjectsPage } from './components/ProjectsPage'
+import { TeamPage } from './components/TeamPage'
+import { QualityControl } from './components/QualityControl'
+import { ReportsPage } from './components/ReportsPage'
+import { WebhookSettings } from './components/WebhookSettings'
+import { NotificationBell } from './components/NotificationCenter'
 
 // Icons as simple SVG components
 const BarChart3Icon = () => (
@@ -47,6 +52,13 @@ const ChevronLeftIcon = () => (
 const ChevronRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="m9 18 6-6-6-6"/>
+  </svg>
+)
+
+const SettingsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3M20.5 7.5L16 12l4.5 4.5M3.5 7.5L8 12l-4.5 4.5M20.5 16.5L16 12l4.5-4.5M3.5 16.5L8 12l-4.5-4.5"/>
   </svg>
 )
 
@@ -219,6 +231,12 @@ export default function App() {
                       setActiveNav(item.label)
                       if (item.label === 'Projects') {
                         setCurrentPage('projects')
+                      } else if (item.label === 'Team') {
+                        setCurrentPage('team')
+                      } else if (item.label === 'Qualifications') {
+                        setCurrentPage('quality')
+                      } else if (item.label === 'Inbox') {
+                        setCurrentPage('reports')
                       } else {
                         setCurrentPage('dashboard')
                       }
@@ -326,30 +344,65 @@ export default function App() {
                 Data Collection & Analysis
               </p>
             </div>
-            <button
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: 'rgba(255, 255, 255, 0.2)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                color: 'white',
-                fontWeight: '500',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ 
+                background: 'white', 
+                borderRadius: '8px', 
+                padding: '0.5rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              + New Project
-            </button>
+                gap: '0.5rem'
+              }}>
+                <NotificationBell />
+                <button
+                  onClick={() => setCurrentPage('webhooks')}
+                  style={{
+                    padding: '0.5rem',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6'
+                    e.currentTarget.style.color = '#111827'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = '#6b7280'
+                  }}
+                  title="Webhook Settings"
+                >
+                  <SettingsIcon />
+                </button>
+              </div>
+              <button
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                + New Project
+              </button>
+            </div>
           </header>
 
           {/* Content */}
@@ -360,6 +413,14 @@ export default function App() {
           }}>
             {currentPage === 'projects' ? (
               <ProjectsPage />
+            ) : currentPage === 'team' ? (
+              <TeamPage />
+            ) : currentPage === 'quality' ? (
+              <QualityControl />
+            ) : currentPage === 'reports' ? (
+              <ReportsPage />
+            ) : currentPage === 'webhooks' ? (
+              <WebhookSettings />
             ) : (
               <>
             {/* Welcome Card */}
