@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #4ade80; color: black; }
+        .error { background: #ef4444; color: white; }
+        .info { background: #3b82f6; color: white; }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Frontend Test Page</h1>
+    <div id="status"></div>
+    
+    <h2>Frontend Preview:</h2>
+    <iframe src="http://localhost:3000" id="frontend-frame"></iframe>
+    
+    <script>
+        const status = document.getElementById('status');
+        
+        // Test if frontend is accessible
+        fetch('http://localhost:3000')
+            .then(response => {
+                if (response.ok) {
+                    status.innerHTML += '<div class="status success">✅ Frontend server is running on port 3000</div>';
+                    return response.text();
+                } else {
+                    status.innerHTML += '<div class="status error">❌ Frontend server returned status: ' + response.status + '</div>';
+                }
+            })
+            .then(html => {
+                if (html && html.includes('root')) {
+                    status.innerHTML += '<div class="status success">✅ HTML contains root element</div>';
+                }
+                if (html && html.includes('main.tsx')) {
+                    status.innerHTML += '<div class="status success">✅ Vite is serving the app</div>';
+                }
+            })
+            .catch(error => {
+                status.innerHTML += '<div class="status error">❌ Cannot connect to frontend: ' + error + '</div>';
+            });
+        
+        // Show the URL
+        status.innerHTML += '<div class="status info">🔗 Frontend URL: <a href="http://localhost:3000" target="_blank" style="color: white;">http://localhost:3000</a></div>';
+        
+        // Try to detect if React loaded in iframe
+        setTimeout(() => {
+            try {
+                const iframe = document.getElementById('frontend-frame');
+                if (iframe.contentDocument) {
+                    const iframeBody = iframe.contentDocument.body;
+                    if (iframeBody && iframeBody.textContent.includes('Verita AI')) {
+                        status.innerHTML += '<div class="status success">✅ React app is rendering content</div>';
+                    }
+                }
+            } catch (e) {
+                // Cross-origin restriction, expected
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
