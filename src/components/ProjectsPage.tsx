@@ -169,15 +169,53 @@ export const ProjectsPage = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600">Manage your data labeling projects</p>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Projects
+          </h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            Manage your data labeling projects and track progress
+          </p>
         </div>
         <button
           onClick={() => setShowNewProjectModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#7c3aed',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#6d28d9'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#7c3aed'
+          }}
         >
           <PlusIcon />
           New Project
@@ -185,92 +223,276 @@ export const ProjectsPage = () => {
       </div>
 
       {/* Projects grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <div key={project.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                project.status === 'active' ? 'bg-green-100 text-green-800' :
-                project.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {project.status}
-              </span>
-            </div>
-            
-            <p className="text-gray-600 text-sm mb-4">{project.description}</p>
-            
-            <div className="mb-4">
-              <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-gray-500">Progress</span>
-                <span className="text-gray-700">{project.tasksCompleted} / {project.tasksTotal}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-purple-600 h-2 rounded-full"
-                  style={{ width: `${(project.tasksCompleted / project.tasksTotal) * 100}%` }}
-                />
-              </div>
-            </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+        gap: '1.5rem'
+      }}>
+        {projects.map((project) => {
+          const progressPercentage = (project.tasksCompleted / project.tasksTotal) * 100
+          const getStatusColor = (status: string) => {
+            switch (status) {
+              case 'active': return { bg: '#ecfdf5', text: '#059669' }
+              case 'completed': return { bg: '#eff6ff', text: '#2563eb' }
+              default: return { bg: '#f3f4f6', text: '#6b7280' }
+            }
+          }
+          const statusColor = getStatusColor(project.status)
 
-            <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-2">Question types:</p>
-              <div className="flex flex-wrap gap-1">
-                {project.questionTypes.map((type) => (
-                  <span key={type} className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">
-                    {type.replace(/_/g, ' ')}
+          return (
+            <div key={project.id} style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              transition: 'box-shadow 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '1rem'
+              }}>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: 0,
+                  flex: 1,
+                  marginRight: '1rem'
+                }}>
+                  {project.name}
+                </h3>
+                <span style={{
+                  padding: '0.25rem 0.75rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  borderRadius: '9999px',
+                  backgroundColor: statusColor.bg,
+                  color: statusColor.text,
+                  textTransform: 'capitalize'
+                }}>
+                  {project.status}
+                </span>
+              </div>
+
+              <p style={{
+                color: '#6b7280',
+                fontSize: '0.875rem',
+                margin: '0 0 1.5rem 0',
+                lineHeight: '1.5'
+              }}>
+                {project.description}
+              </p>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  <span style={{ color: '#6b7280' }}>Progress</span>
+                  <span style={{ color: '#111827', fontWeight: '500' }}>
+                    {project.tasksCompleted} / {project.tasksTotal}
                   </span>
-                ))}
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '8px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${progressPercentage}%`,
+                    height: '100%',
+                    backgroundColor: '#7c3aed',
+                    borderRadius: '4px',
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: '#6b7280',
+                  margin: '0 0 0.5rem 0',
+                  fontWeight: '500'
+                }}>
+                  Question types:
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {project.questionTypes.map((type) => (
+                    <span key={type} style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      backgroundColor: '#f3e8ff',
+                      color: '#7c3aed',
+                      borderRadius: '4px',
+                      fontWeight: '500'
+                    }}>
+                      {type.replace(/_/g, ' ')}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{
+                  fontSize: '0.75rem',
+                  color: '#6b7280'
+                }}>
+                  Created {project.createdAt}
+                </span>
+                {project.status === 'active' && (
+                  <button
+                    onClick={() => handleStartAnnotation(project)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      padding: '0.5rem 0.75rem',
+                      backgroundColor: '#7c3aed',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#6d28d9'
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = '#7c3aed'
+                    }}
+                  >
+                    <PlayIcon />
+                    Start
+                  </button>
+                )}
               </div>
             </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Created {project.createdAt}</span>
-              {project.status === 'active' && (
-                <button
-                  onClick={() => handleStartAnnotation(project)}
-                  className="flex items-center gap-1 px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
-                >
-                  <PlayIcon />
-                  Start
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* New Project Modal */}
       {showNewProjectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create New Project</h2>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            width: '100%',
+            maxWidth: '500px',
+            margin: '1rem',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: '#111827',
+              margin: '0 0 1.5rem 0'
+            }}>
+              Create New Project
+            </h2>
             <form onSubmit={(e) => {
               e.preventDefault()
               setShowNewProjectModal(false)
               alert('Project creation would be implemented here')
             }}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Project Name
+                </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem'
+                  }}
                   placeholder="Enter project name"
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Description
+                </label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    minHeight: '80px',
+                    resize: 'vertical'
+                  }}
                   placeholder="Describe your project"
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Question Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500">
+              <div style={{ marginBottom: '2rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Question Type
+                </label>
+                <select style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  backgroundColor: 'white'
+                }}>
                   <option value="text_classification">Text Classification</option>
                   <option value="image_classification">Image Classification</option>
                   <option value="sentiment_analysis">Sentiment Analysis</option>
@@ -278,17 +500,37 @@ export const ProjectsPage = () => {
                   <option value="multiple_choice">Multiple Choice</option>
                 </select>
               </div>
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    backgroundColor: '#7c3aed',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
                 >
                   Create Project
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowNewProjectModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancel
                 </button>

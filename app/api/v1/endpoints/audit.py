@@ -5,7 +5,7 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import deps
+from app.core import deps
 from app.models.user import User
 from app.models.audit_trail import AuditTrail, DataVersion
 from app.services.audit import AuditService, get_audit_service

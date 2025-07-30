@@ -41,12 +41,12 @@ interface ChatMessage {
 }
 
 interface CollaborationPanelProps {
-  projectId: string
+  projectId?: string
   taskId?: string
   onClose?: () => void
 }
 
-export const CollaborationPanel = ({ projectId, taskId, onClose }: CollaborationPanelProps) => {
+export const CollaborationPanel = ({ projectId, taskId, onClose }: CollaborationPanelProps = {}) => {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([
     {
       id: '1',
@@ -143,134 +143,334 @@ export const CollaborationPanel = ({ projectId, taskId, onClose }: Collaboration
   }
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-40 flex flex-col">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <UsersIcon />
-            Collaboration
-          </h3>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          color: '#111827',
+          margin: '0 0 0.5rem 0'
+        }}>
+          Collaboration
+        </h1>
+        <p style={{
+          color: '#6b7280',
+          fontSize: '1rem',
+          margin: 0
+        }}>
+          Real-time collaboration and team communication
+        </p>
       </div>
 
-      {/* Active Users */}
-      <div className="p-4 border-b">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Active Now ({activeUsers.filter(u => u.status === 'active').length})</h4>
-        <div className="space-y-2">
-          {activeUsers.map(user => (
-            <div key={user.id} className="flex items-center gap-3">
-              <div className="relative">
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                  style={{ backgroundColor: user.color }}
-                >
-                  {user.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${
-                  user.status === 'active' ? 'bg-green-500' :
-                  user.status === 'idle' ? 'bg-yellow-500' :
-                  'bg-gray-400'
-                }`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate">{user.currentTask}</p>
-              </div>
-              {user.position && (
-                <div className="relative">
-                  <CursorIcon color={user.color} />
-                </div>
-              )}
+      {/* Main Content Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 400px',
+        gap: '2rem',
+        height: 'calc(100vh - 8rem)'
+      }}>
+        {/* Left Column - Active Users & Activity */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Active Users */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#111827',
+                margin: 0
+              }}>
+                Active Now ({activeUsers.filter(u => u.status === 'active').length})
+              </h2>
             </div>
-          ))}
-        </div>
-      </div>
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {activeUsers.map(user => (
+                  <div key={user.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: user.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '0.875rem',
+                        fontWeight: '500'
+                      }}>
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        border: '2px solid white',
+                        backgroundColor: user.status === 'active' ? '#10b981' :
+                                       user.status === 'idle' ? '#f59e0b' : '#6b7280'
+                      }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: '#111827',
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        {user.name}
+                      </p>
+                      <p style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {user.currentTask}
+                      </p>
+                    </div>
+                    {user.position && (
+                      <div style={{ position: 'relative' }}>
+                        <CursorIcon color={user.color} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-      {/* Activity Feed / Chat */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-4 border-b bg-gray-50">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-700">Team Chat</h4>
-            <button
-              onClick={() => setShowChat(!showChat)}
-              className="text-xs text-purple-600 hover:text-purple-800"
-            >
-              {showChat ? 'Hide' : 'Show'}
-            </button>
+          {/* Recent Activity */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            flex: 1
+          }}>
+            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#111827',
+                margin: 0
+              }}>
+                Recent Activity
+              </h2>
+            </div>
+            <div style={{ padding: '1.5rem 2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {[
+                  { user: 'Sarah Johnson', action: 'completed 15 image classifications', time: '2 minutes ago', color: '#3b82f6' },
+                  { user: 'Mike Chen', action: 'started quality review for batch #47', time: '5 minutes ago', color: '#10b981' },
+                  { user: 'John Smith', action: 'flagged 3 items for discussion', time: '12 minutes ago', color: '#ef4444' },
+                  { user: 'Emily Davis', action: 'approved consensus for 28 tasks', time: '18 minutes ago', color: '#8b5cf6' }
+                ].map((activity, index) => (
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activity.color,
+                      flexShrink: 0
+                    }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#111827',
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        <strong>{activity.user}</strong> {activity.action}
+                      </p>
+                      <p style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        margin: 0
+                      }}>
+                        {activity.time}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {showChat && (
-          <>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {chatMessages.map(msg => (
-                <div key={msg.id} className={`flex gap-2 ${msg.userId === 'current' ? 'justify-end' : ''}`}>
-                  {msg.userId !== 'current' && (
-                    <div 
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0"
-                      style={{ backgroundColor: activeUsers.find(u => u.id === msg.userId)?.color || '#6b7280' }}
-                    >
-                      {msg.userName[0]}
+        {/* Right Column - Team Chat */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#111827',
+                margin: 0
+              }}>
+                Team Chat
+              </h2>
+              <button
+                onClick={() => setShowChat(!showChat)}
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#7c3aed',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {showChat ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          {showChat && (
+            <>
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '1.5rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {chatMessages.map(msg => (
+                  <div key={msg.id} style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    justifyContent: msg.userId === 'current' ? 'flex-end' : 'flex-start'
+                  }}>
+                    {msg.userId !== 'current' && (
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        backgroundColor: activeUsers.find(u => u.id === msg.userId)?.color || '#6b7280',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '0.75rem',
+                        flexShrink: 0
+                      }}>
+                        {msg.userName[0]}
+                      </div>
+                    )}
+                    <div style={{
+                      maxWidth: '75%',
+                      order: msg.userId === 'current' ? -1 : 0
+                    }}>
+                      <div style={{
+                        borderRadius: '12px',
+                        padding: '0.75rem 1rem',
+                        backgroundColor: msg.userId === 'current' ? '#7c3aed' : '#f3f4f6',
+                        color: msg.userId === 'current' ? 'white' : '#111827'
+                      }}>
+                        {msg.userId !== 'current' && (
+                          <p style={{
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            margin: '0 0 0.25rem 0',
+                            opacity: 0.8
+                          }}>
+                            {msg.userName}
+                          </p>
+                        )}
+                        <p style={{ fontSize: '0.875rem', margin: 0 }}>
+                          {msg.message}
+                        </p>
+                      </div>
+                      <p style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        margin: '0.25rem 0 0 0',
+                        textAlign: msg.userId === 'current' ? 'right' : 'left'
+                      }}>
+                        {formatTime(msg.timestamp)}
+                      </p>
                     </div>
-                  )}
-                  <div className={`max-w-[75%] ${msg.userId === 'current' ? 'order-first' : ''}`}>
-                    <div className={`rounded-lg px-3 py-2 ${
-                      msg.userId === 'current' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-100 text-gray-900'
-                    }`}>
-                      {msg.userId !== 'current' && (
-                        <p className="text-xs font-medium mb-1">{msg.userName}</p>
-                      )}
-                      <p className="text-sm">{msg.message}</p>
-                    </div>
-                    <p className={`text-xs text-gray-500 mt-1 ${
-                      msg.userId === 'current' ? 'text-right' : ''
-                    }`}>
-                      {formatTime(msg.timestamp)}
-                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 text-sm"
-                />
-                <button
-                  onClick={sendMessage}
-                  className="px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                >
-                  <MessageIcon />
-                </button>
+                ))}
               </div>
-            </div>
-          </>
-        )}
-      </div>
 
-      {/* Live Updates */}
-      <div className="p-4 border-t bg-yellow-50">
-        <p className="text-xs text-yellow-800">
-          <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-1 animate-pulse"></span>
-          Sarah is currently reviewing your recent annotations
-        </p>
+              <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    placeholder="Type a message..."
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem'
+                    }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#7c3aed',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <MessageIcon />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Live Updates */}
+          <div style={{
+            padding: '1rem 2rem',
+            borderTop: '1px solid #e5e7eb',
+            backgroundColor: '#fef3c7'
+          }}>
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#92400e',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <span style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#f59e0b',
+                borderRadius: '50%',
+                animation: 'pulse 2s infinite'
+              }} />
+              Sarah is currently reviewing your recent annotations
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

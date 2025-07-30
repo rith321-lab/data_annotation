@@ -154,10 +154,10 @@ export const TaskQueue = () => {
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
-      case 'urgent': return 'text-red-600 bg-red-100'
-      case 'high': return 'text-orange-600 bg-orange-100'
-      case 'medium': return 'text-yellow-600 bg-yellow-100'
-      case 'low': return 'text-green-600 bg-green-100'
+      case 'urgent': return { text: '#dc2626', bg: '#fef2f2', border: '#fecaca' }
+      case 'high': return { text: '#ea580c', bg: '#fff7ed', border: '#fed7aa' }
+      case 'medium': return { text: '#d97706', bg: '#fef3c7', border: '#fde68a' }
+      case 'low': return { text: '#059669', bg: '#ecfdf5', border: '#bbf7d0' }
     }
   }
 
@@ -234,59 +234,152 @@ export const TaskQueue = () => {
   })
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
             <ListIcon />
             Task Queue
           </h1>
-          <p className="text-gray-600">Manage and prioritize your annotation tasks</p>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            Manage and prioritize your annotation tasks
+          </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Total Earnings Today</p>
-            <p className="text-xl font-bold text-green-600">$12.45</p>
-          </div>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          textAlign: 'right'
+        }}>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem 0' }}>
+            Total Earnings Today
+          </p>
+          <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669', margin: 0 }}>
+            $12.45
+          </p>
         </div>
       </div>
 
       {/* Current Task */}
       {currentTask && (
-        <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
-          <div className="flex items-start justify-between mb-4">
+        <div style={{
+          backgroundColor: '#f3e8ff',
+          border: '2px solid #a855f7',
+          borderRadius: '12px',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: '1.5rem'
+          }}>
             <div>
-              <h2 className="text-lg font-semibold text-purple-900">Current Task</h2>
-              <p className="text-purple-700">{currentTask.title}</p>
-              <p className="text-sm text-purple-600">{currentTask.projectName}</p>
+              <h2 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#581c87',
+                margin: '0 0 0.5rem 0'
+              }}>
+                Current Task
+              </h2>
+              <p style={{
+                fontSize: '1rem',
+                color: '#7c3aed',
+                margin: '0 0 0.25rem 0',
+                fontWeight: '500'
+              }}>
+                {currentTask.title}
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#8b5cf6',
+                margin: 0
+              }}>
+                {currentTask.projectName}
+              </p>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-mono font-bold text-purple-900">
+            <div style={{ textAlign: 'right' }}>
+              <div style={{
+                fontSize: '2rem',
+                fontFamily: 'monospace',
+                fontWeight: '700',
+                color: '#581c87',
+                margin: '0 0 0.25rem 0'
+              }}>
                 {formatTime(timeSpent)}
               </div>
-              <p className="text-sm text-purple-600">
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#8b5cf6',
+                margin: 0
+              }}>
                 Est. {currentTask.estimatedTime}min
               </p>
             </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-sm">
-                Progress: <span className="font-medium">{currentTask.completedCount} / {currentTask.totalCount}</span>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ fontSize: '0.875rem', color: '#581c87' }}>
+                Progress: <span style={{ fontWeight: '500' }}>
+                  {currentTask.completedCount} / {currentTask.totalCount}
+                </span>
               </div>
-              <div className="w-48 bg-purple-200 rounded-full h-2">
-                <div 
-                  className="bg-purple-600 h-2 rounded-full transition-all"
-                  style={{ width: `${(currentTask.completedCount / currentTask.totalCount) * 100}%` }}
-                />
+              <div style={{
+                width: '200px',
+                height: '8px',
+                backgroundColor: '#c4b5fd',
+                borderRadius: '4px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${(currentTask.completedCount / currentTask.totalCount) * 100}%`,
+                  height: '100%',
+                  backgroundColor: '#7c3aed',
+                  borderRadius: '4px',
+                  transition: 'width 0.3s ease'
+                }} />
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {isTimerRunning ? (
                 <button
                   onClick={pauseTask}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 flex items-center gap-2"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#f59e0b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
                 >
                   <PauseIcon />
                   Pause
@@ -294,7 +387,19 @@ export const TaskQueue = () => {
               ) : (
                 <button
                   onClick={() => setIsTimerRunning(true)}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
                 >
                   <PlayIcon />
                   Resume
@@ -302,13 +407,31 @@ export const TaskQueue = () => {
               )}
               <button
                 onClick={completeTask}
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#7c3aed',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
               >
                 Complete Task
               </button>
               <button
                 onClick={() => window.open(`/annotate/${currentTask.id}`, '_blank')}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
               >
                 Open Interface
               </button>
@@ -318,13 +441,26 @@ export const TaskQueue = () => {
       )}
 
       {/* Filters and Sort */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <select
               value={filter.priority || ''}
               onChange={(e) => setFilter({ ...filter, priority: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                backgroundColor: 'white'
+              }}
             >
               <option value="">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -332,11 +468,17 @@ export const TaskQueue = () => {
               <option value="medium">Medium</option>
               <option value="low">Low</option>
             </select>
-            
+
             <select
               value={filter.type || ''}
               onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                backgroundColor: 'white'
+              }}
             >
               <option value="">All Types</option>
               <option value="image_classification">Image Classification</option>
@@ -348,7 +490,13 @@ export const TaskQueue = () => {
             <select
               value={filter.status || ''}
               onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                backgroundColor: 'white'
+              }}
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -358,12 +506,18 @@ export const TaskQueue = () => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Sort by:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Sort by:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                backgroundColor: 'white'
+              }}
             >
               <option value="priority">Priority</option>
               <option value="deadline">Deadline</option>
@@ -374,112 +528,259 @@ export const TaskQueue = () => {
       </div>
 
       {/* Task List */}
-      <div className="space-y-4">
-        {sortedTasks.map((task) => (
-          <div key={task.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-medium text-gray-900">{task.title}</h3>
-                  <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${getPriorityColor(task.priority)}`}>
-                    {task.priority === 'urgent' && <FireIcon />}
-                    {task.priority}
-                  </span>
-                  {task.deadline && (
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                      <ClockIcon />
-                      {formatDeadline(task.deadline)}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {sortedTasks.map((task) => {
+          const priorityColor = getPriorityColor(task.priority)
+
+          return (
+            <div key={task.id} style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              padding: '1.5rem',
+              transition: 'box-shadow 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <h3 style={{
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      color: '#111827',
+                      margin: 0
+                    }}>
+                      {task.title}
+                    </h3>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      borderRadius: '9999px',
+                      backgroundColor: priorityColor.bg,
+                      color: priorityColor.text,
+                      border: `1px solid ${priorityColor.border}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      textTransform: 'capitalize'
+                    }}>
+                      {task.priority === 'urgent' && <FireIcon />}
+                      {task.priority}
+                    </span>
+                    {task.deadline && (
+                      <span style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}>
+                        <ClockIcon />
+                        {formatDeadline(task.deadline)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    marginBottom: '1rem'
+                  }}>
+                    <span>{task.projectName}</span>
+                    <span>•</span>
+                    <span>{task.type.replace(/_/g, ' ')}</span>
+                    <span>•</span>
+                    <span>~{task.estimatedTime} min</span>
+                    <span>•</span>
+                    <span style={{ color: '#059669', fontWeight: '500' }}>
+                      ${task.reward}/item
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {task.tags.map((tag) => (
+                      <span key={tag} style={{
+                        padding: '0.25rem 0.5rem',
+                        fontSize: '0.75rem',
+                        backgroundColor: '#f3f4f6',
+                        color: '#374151',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}>
+                        <TagIcon />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#111827',
+                      margin: '0 0 0.25rem 0'
+                    }}>
+                      {task.completedCount} / {task.totalCount}
+                    </p>
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: '#6b7280',
+                      margin: 0
+                    }}>
+                      items
+                    </p>
+                  </div>
+
+                  {task.status === 'pending' && (
+                    <button
+                      onClick={() => startTask(task)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#7c3aed',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <PlayIcon />
+                      Start
+                    </button>
+                  )}
+
+                  {task.status === 'in_progress' && task.id !== currentTask?.id && (
+                    <button
+                      onClick={() => setCurrentTask(task)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#2563eb',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Continue
+                    </button>
+                  )}
+
+                  {task.status === 'paused' && (
+                    <button
+                      onClick={() => {
+                        setCurrentTask(task)
+                        setIsTimerRunning(true)
+                      }}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#d97706',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Resume
+                    </button>
+                  )}
+
+                  {task.status === 'completed' && (
+                    <span style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#ecfdf5',
+                      color: '#059669',
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      fontWeight: '500'
+                    }}>
+                      ✓ Completed
                     </span>
                   )}
                 </div>
-                
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                  <span>{task.projectName}</span>
-                  <span>•</span>
-                  <span>{task.type.replace(/_/g, ' ')}</span>
-                  <span>•</span>
-                  <span>~{task.estimatedTime} min</span>
-                  <span>•</span>
-                  <span className="text-green-600 font-medium">${task.reward}/item</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {task.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded flex items-center gap-1">
-                      <TagIcon />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               </div>
 
-              <div className="flex flex-col items-end gap-2">
-                <div className="text-right">
-                  <p className="text-sm font-medium">{task.completedCount} / {task.totalCount}</p>
-                  <p className="text-xs text-gray-500">items</p>
+              {task.completedCount > 0 && (
+                <div style={{ marginTop: '1rem' }}>
+                  <div style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${(task.completedCount / task.totalCount) * 100}%`,
+                      height: '100%',
+                      backgroundColor: '#7c3aed',
+                      borderRadius: '4px',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
                 </div>
-                
-                {task.status === 'pending' && (
-                  <button
-                    onClick={() => startTask(task)}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center gap-2"
-                  >
-                    <PlayIcon />
-                    Start
-                  </button>
-                )}
-                
-                {task.status === 'in_progress' && task.id !== currentTask?.id && (
-                  <button
-                    onClick={() => setCurrentTask(task)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Continue
-                  </button>
-                )}
-                
-                {task.status === 'paused' && (
-                  <button
-                    onClick={() => {
-                      setCurrentTask(task)
-                      setIsTimerRunning(true)
-                    }}
-                    className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-                  >
-                    Resume
-                  </button>
-                )}
-                
-                {task.status === 'completed' && (
-                  <span className="px-4 py-2 bg-green-100 text-green-800 rounded-md">
-                    ✓ Completed
-                  </span>
-                )}
-              </div>
+              )}
             </div>
-
-            {task.completedCount > 0 && (
-              <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${(task.completedCount / task.totalCount) * 100}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Empty State */}
       {sortedTasks.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <ListIcon />
-          <p className="mt-4 text-gray-600">No tasks match your current filters</p>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          padding: '3rem',
+          textAlign: 'center'
+        }}>
+          <div style={{ color: '#9ca3af', marginBottom: '1rem' }}>
+            <ListIcon />
+          </div>
+          <p style={{
+            fontSize: '1rem',
+            color: '#6b7280',
+            margin: '0 0 1rem 0'
+          }}>
+            No tasks match your current filters
+          </p>
           <button
             onClick={() => setFilter({})}
-            className="mt-4 text-purple-600 hover:text-purple-800"
+            style={{
+              fontSize: '0.875rem',
+              color: '#7c3aed',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
           >
             Clear filters
           </button>

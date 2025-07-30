@@ -119,20 +119,19 @@ export const AnalyticsDashboard = () => {
 
   const getInsightColor = (type: MLInsight['type']) => {
     switch (type) {
-      case 'anomaly': return 'text-red-600 bg-red-100'
-      case 'trend': return 'text-blue-600 bg-blue-100'
-      case 'prediction': return 'text-purple-600 bg-purple-100'
-      case 'recommendation': return 'text-green-600 bg-green-100'
+      case 'anomaly': return { text: '#dc2626', bg: '#fef2f2' }
+      case 'trend': return { text: '#2563eb', bg: '#eff6ff' }
+      case 'prediction': return { text: '#7c3aed', bg: '#f3e8ff' }
+      case 'recommendation': return { text: '#059669', bg: '#ecfdf5' }
     }
   }
 
   const getImpactBadge = (impact: MLInsight['impact']) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      low: 'bg-green-100 text-green-800'
+    switch (impact) {
+      case 'high': return { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' }
+      case 'medium': return { bg: '#fef3c7', text: '#d97706', border: '#fed7aa' }
+      case 'low': return { bg: '#ecfdf5', text: '#059669', border: '#bbf7d0' }
     }
-    return colors[impact]
   }
 
   // Mock chart component
@@ -142,16 +141,31 @@ export const AnalyticsDashboard = () => {
     const range = max - min
 
     return (
-      <div className="relative h-32 flex items-end gap-1">
+      <div style={{
+        position: 'relative',
+        height: '32px',
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '2px'
+      }}>
         {data.map((value, index) => (
           <div
             key={index}
-            className="flex-1 bg-current rounded-t transition-all duration-300 hover:opacity-80"
             style={{
+              flex: 1,
+              backgroundColor: color,
+              borderRadius: '2px 2px 0 0',
+              transition: 'all 0.3s ease',
               height: `${((value - min) / range) * 100 || 50}%`,
-              color: color
+              cursor: 'pointer'
             }}
             title={`${value}`}
+            onMouseOver={(e) => {
+              e.currentTarget.style.opacity = '0.8'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.opacity = '1'
+            }}
           />
         ))}
       </div>
@@ -159,16 +173,42 @@ export const AnalyticsDashboard = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics & ML Insights</h1>
-          <p className="text-gray-600">AI-powered analytics and performance predictions</p>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Analytics & Insights
+          </h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            AI-powered analytics and performance predictions
+          </p>
         </div>
-        <select 
+        <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+          style={{
+            padding: '0.75rem 1rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            backgroundColor: 'white',
+            color: '#374151'
+          }}
         >
           <option value="24h">Last 24 hours</option>
           <option value="7d">Last 7 days</option>
@@ -178,33 +218,55 @@ export const AnalyticsDashboard = () => {
       </div>
 
       {/* Key Metrics with Predictions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
         {metrics.map((metric, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-4">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">{metric.label}</h3>
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-2xl font-bold">
+          <div key={index} style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#6b7280',
+              margin: '0 0 1rem 0'
+            }}>
+              {metric.label}
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '2rem', fontWeight: '700', color: '#111827' }}>
                 {metric.label.includes('Accuracy') || metric.label.includes('Score') || metric.label.includes('Efficiency')
                   ? `${metric.value}%`
                   : metric.value.toLocaleString()
                 }
               </span>
-              <span className={`text-sm font-medium ${metric.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: metric.change > 0 ? '#059669' : '#dc2626'
+              }}>
                 {metric.change > 0 ? '↑' : '↓'} {Math.abs(metric.change)}%
               </span>
             </div>
-            <div className="text-xs text-gray-500">
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem' }}>
               Forecast: {metric.label.includes('Accuracy') || metric.label.includes('Score') || metric.label.includes('Efficiency')
                 ? `${metric.forecast}%`
                 : metric.forecast.toLocaleString()
               }
             </div>
-            <div className="mt-2 h-8">
-              <SimpleChart 
-                data={performanceData[metric.label.toLowerCase().includes('accuracy') ? 'accuracy' : 
+            <div style={{ height: '32px' }}>
+              <SimpleChart
+                data={performanceData[metric.label.toLowerCase().includes('accuracy') ? 'accuracy' :
                       metric.label.toLowerCase().includes('throughput') ? 'throughput' :
                       metric.label.toLowerCase().includes('quality') ? 'quality' : 'efficiency']}
-                color="#8b5cf6"
+                color="#7c3aed"
               />
             </div>
           </div>
@@ -212,144 +274,322 @@ export const AnalyticsDashboard = () => {
       </div>
 
       {/* ML Insights */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        marginBottom: '2rem'
+      }}>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            margin: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
             <BrainIcon />
             ML-Powered Insights
           </h2>
-          <div className="space-y-4">
-            {insights.map((insight) => (
-              <div key={insight.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getInsightColor(insight.type)}`}>
-                    {getInsightIcon(insight.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-gray-900">{insight.title}</h3>
-                      <span className={`px-2 py-1 text-xs rounded-full ${getImpactBadge(insight.impact)}`}>
-                        {insight.impact} impact
-                      </span>
+        </div>
+        <div style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {insights.map((insight) => {
+              const insightColor = getInsightColor(insight.type)
+              const impactBadge = getImpactBadge(insight.impact)
+
+              return (
+                <div key={insight.id} style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  transition: 'box-shadow 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '8px',
+                      backgroundColor: insightColor.bg,
+                      color: insightColor.text,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {getInsightIcon(insight.type)}
                     </div>
-                    <p className="text-sm text-gray-600">{insight.description}</p>
-                    {insight.type === 'recommendation' && (
-                      <button className="mt-2 text-sm text-purple-600 hover:text-purple-800">
-                        Apply recommendation →
-                      </button>
-                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <h3 style={{
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          color: '#111827',
+                          margin: 0
+                        }}>
+                          {insight.title}
+                        </h3>
+                        <span style={{
+                          padding: '0.25rem 0.5rem',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          borderRadius: '9999px',
+                          backgroundColor: impactBadge.bg,
+                          color: impactBadge.text,
+                          border: `1px solid ${impactBadge.border}`,
+                          textTransform: 'capitalize'
+                        }}>
+                          {insight.impact} impact
+                        </span>
+                      </div>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        margin: '0 0 1rem 0',
+                        lineHeight: '1.5'
+                      }}>
+                        {insight.description}
+                      </p>
+                      {insight.type === 'recommendation' && (
+                        <button style={{
+                          fontSize: '0.875rem',
+                          color: '#7c3aed',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '500'
+                        }}>
+                          Apply recommendation →
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
 
       {/* Performance Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gap: '2rem'
+      }}>
         {/* Worker Performance Distribution */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Worker Performance Distribution</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Top Performers (95%+)</span>
-              <div className="flex items-center gap-2">
-                <div className="w-32 bg-gray-200 rounded-full h-3">
-                  <div className="bg-green-500 h-3 rounded-full" style={{ width: '18%' }} />
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#111827',
+              margin: 0
+            }}>
+              Worker Performance Distribution
+            </h3>
+          </div>
+          <div style={{ padding: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {[
+                { label: 'Top Performers (95%+)', percentage: 18, color: '#10b981' },
+                { label: 'High Performers (85-95%)', percentage: 45, color: '#3b82f6' },
+                { label: 'Average (75-85%)', percentage: 28, color: '#f59e0b' },
+                { label: 'Need Improvement (<75%)', percentage: 9, color: '#ef4444' }
+              ].map((item, index) => (
+                <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                    {item.label}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                      width: '120px',
+                      height: '8px',
+                      backgroundColor: '#e5e7eb',
+                      borderRadius: '4px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${item.percentage}%`,
+                        height: '100%',
+                        backgroundColor: item.color,
+                        borderRadius: '4px'
+                      }} />
+                    </div>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#111827',
+                      minWidth: '32px'
+                    }}>
+                      {item.percentage}%
+                    </span>
+                  </div>
                 </div>
-                <span className="text-sm font-medium">18%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">High Performers (85-95%)</span>
-              <div className="flex items-center gap-2">
-                <div className="w-32 bg-gray-200 rounded-full h-3">
-                  <div className="bg-blue-500 h-3 rounded-full" style={{ width: '45%' }} />
-                </div>
-                <span className="text-sm font-medium">45%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Average (75-85%)</span>
-              <div className="flex items-center gap-2">
-                <div className="w-32 bg-gray-200 rounded-full h-3">
-                  <div className="bg-yellow-500 h-3 rounded-full" style={{ width: '28%' }} />
-                </div>
-                <span className="text-sm font-medium">28%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Need Improvement (&lt;75%)</span>
-              <div className="flex items-center gap-2">
-                <div className="w-32 bg-gray-200 rounded-full h-3">
-                  <div className="bg-red-500 h-3 rounded-full" style={{ width: '9%' }} />
-                </div>
-                <span className="text-sm font-medium">9%</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Task Type Performance */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Performance by Task Type</h3>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Image Classification</span>
-                <span className="font-medium">96.2%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '96.2%' }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Text Analysis</span>
-                <span className="font-medium">92.8%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '92.8%' }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Entity Recognition</span>
-                <span className="font-medium">89.5%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '89.5%' }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Audio Transcription</span>
-                <span className="font-medium">87.3%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '87.3%' }} />
-              </div>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#111827',
+              margin: 0
+            }}>
+              Performance by Task Type
+            </h3>
+          </div>
+          <div style={{ padding: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {[
+                { name: 'Image Classification', percentage: 96.2 },
+                { name: 'Text Analysis', percentage: 92.8 },
+                { name: 'Entity Recognition', percentage: 89.5 },
+                { name: 'Audio Transcription', percentage: 87.3 }
+              ].map((task, index) => (
+                <div key={index}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                      {task.name}
+                    </span>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#111827'
+                    }}>
+                      {task.percentage}%
+                    </span>
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${task.percentage}%`,
+                      height: '100%',
+                      backgroundColor: '#7c3aed',
+                      borderRadius: '4px'
+                    }} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* AI Model Performance */}
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
-        <h3 className="text-lg font-semibold mb-4">AI Suggestion Model Performance</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">84.3%</div>
-            <p className="text-sm text-gray-600">Suggestion Acceptance Rate</p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">2.3x</div>
-            <p className="text-sm text-gray-600">Speed Improvement</p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">-31%</div>
-            <p className="text-sm text-gray-600">Error Reduction</p>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        marginTop: '2rem'
+      }}>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+          <h3 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            margin: 0
+          }}>
+            AI Suggestion Model Performance
+          </h3>
+        </div>
+        <div style={{ padding: '2rem' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '2rem'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '3rem',
+                fontWeight: '700',
+                color: '#7c3aed',
+                margin: '0 0 0.5rem 0'
+              }}>
+                84.3%
+              </div>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                margin: 0
+              }}>
+                Suggestion Acceptance Rate
+              </p>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '3rem',
+                fontWeight: '700',
+                color: '#059669',
+                margin: '0 0 0.5rem 0'
+              }}>
+                2.3x
+              </div>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                margin: 0
+              }}>
+                Speed Improvement
+              </p>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '3rem',
+                fontWeight: '700',
+                color: '#2563eb',
+                margin: '0 0 0.5rem 0'
+              }}>
+                -31%
+              </div>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                margin: 0
+              }}>
+                Error Reduction
+              </p>
+            </div>
           </div>
         </div>
       </div>

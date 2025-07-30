@@ -169,12 +169,12 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
 
   const getActionColor = (action: string) => {
     switch (action) {
-      case 'create': return 'text-green-600 bg-green-100'
-      case 'update': return 'text-blue-600 bg-blue-100'
-      case 'delete': return 'text-red-600 bg-red-100'
-      case 'submit': return 'text-purple-600 bg-purple-100'
-      case 'revert': return 'text-yellow-600 bg-yellow-100'
-      default: return 'text-gray-600 bg-gray-100'
+      case 'create': return { text: '#059669', bg: '#ecfdf5' }
+      case 'update': return { text: '#2563eb', bg: '#eff6ff' }
+      case 'delete': return { text: '#dc2626', bg: '#fef2f2' }
+      case 'submit': return { text: '#7c3aed', bg: '#f3e8ff' }
+      case 'revert': return { text: '#d97706', bg: '#fef3c7' }
+      default: return { text: '#6b7280', bg: '#f3f4f6' }
     }
   }
 
@@ -209,20 +209,37 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
     if (!changes) return null
 
     return (
-      <div className="mt-2 text-sm">
+      <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
         {Object.entries(changes).map(([field, change]: [string, any]) => (
-          <div key={field} className="flex items-center gap-2 text-gray-600">
-            <span className="font-medium">{field}:</span>
+          <div key={field} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            color: '#6b7280',
+            marginBottom: '0.25rem'
+          }}>
+            <span style={{ fontWeight: '500' }}>{field}:</span>
             {change.old && change.new ? (
               <>
-                <span className="line-through text-red-600">{String(change.old)}</span>
+                <span style={{
+                  textDecoration: 'line-through',
+                  color: '#dc2626'
+                }}>
+                  {String(change.old)}
+                </span>
                 <span>→</span>
-                <span className="text-green-600">{String(change.new)}</span>
+                <span style={{ color: '#059669' }}>
+                  {String(change.new)}
+                </span>
               </>
             ) : change.added ? (
-              <span className="text-green-600">+{change.added} added</span>
+              <span style={{ color: '#059669' }}>
+                +{change.added} added
+              </span>
             ) : change.removed ? (
-              <span className="text-red-600">-{change.removed} removed</span>
+              <span style={{ color: '#dc2626' }}>
+                -{change.removed} removed
+              </span>
             ) : (
               <span>changed</span>
             )}
@@ -233,52 +250,119 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          color: '#111827',
+          margin: '0 0 0.5rem 0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
           <HistoryIcon />
           Audit Trail & Version History
         </h1>
-        <p className="text-gray-600">Track changes and manage data versions</p>
+        <p style={{
+          color: '#6b7280',
+          fontSize: '1rem',
+          margin: 0
+        }}>
+          Track changes and manage data versions with complete audit logging
+        </p>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b">
-          <nav className="flex -mb-px">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: '#f9fafb'
+        }}>
+          <nav style={{ display: 'flex' }}>
             <button
               onClick={() => setActiveTab('audit')}
-              className={`px-6 py-3 text-sm font-medium ${
-                activeTab === 'audit'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              style={{
+                padding: '1rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                backgroundColor: activeTab === 'audit' ? 'white' : 'transparent',
+                color: activeTab === 'audit' ? '#111827' : '#6b7280',
+                borderBottom: activeTab === 'audit' ? '2px solid #7c3aed' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (activeTab !== 'audit') {
+                  e.currentTarget.style.color = '#374151'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeTab !== 'audit') {
+                  e.currentTarget.style.color = '#6b7280'
+                }
+              }}
             >
               Audit Trail
             </button>
             <button
               onClick={() => setActiveTab('versions')}
-              className={`px-6 py-3 text-sm font-medium ${
-                activeTab === 'versions'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              style={{
+                padding: '1rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                backgroundColor: activeTab === 'versions' ? 'white' : 'transparent',
+                color: activeTab === 'versions' ? '#111827' : '#6b7280',
+                borderBottom: activeTab === 'versions' ? '2px solid #7c3aed' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (activeTab !== 'versions') {
+                  e.currentTarget.style.color = '#374151'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeTab !== 'versions') {
+                  e.currentTarget.style.color = '#6b7280'
+                }
+              }}
             >
               Version History
             </button>
           </nav>
         </div>
 
-        <div className="p-6">
+        <div style={{ padding: '2rem' }}>
           {/* Audit Trail Tab */}
           {activeTab === 'audit' && (
             <div>
               {/* Filters */}
-              <div className="flex items-center gap-4 mb-6">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '2rem'
+              }}>
                 <select
                   value={filter.action}
                   onChange={(e) => setFilter({ ...filter, action: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    backgroundColor: 'white'
+                  }}
                 >
                   <option value="">All Actions</option>
                   <option value="create">Create</option>
@@ -291,7 +375,13 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
                 <select
                   value={filter.dateRange}
                   onChange={(e) => setFilter({ ...filter, dateRange: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    backgroundColor: 'white'
+                  }}
                 >
                   <option value="24h">Last 24 hours</option>
                   <option value="7d">Last 7 days</option>
@@ -301,32 +391,89 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
               </div>
 
               {/* Audit Entries */}
-              <div className="space-y-4">
-                {auditEntries.map((entry) => (
-                  <div key={entry.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getActionColor(entry.action)}`}>
-                          {getActionIcon(entry.action)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{entry.userName}</span>
-                            <span className="text-sm text-gray-500">{entry.action}</span>
-                            <span className="text-sm text-gray-500">
-                              {entry.entityType} #{entry.entityId}
-                            </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {auditEntries.map((entry) => {
+                  const actionColor = getActionColor(entry.action)
+
+                  return (
+                    <div key={entry.id} style={{
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '1.5rem',
+                      transition: 'box-shadow 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: actionColor.bg,
+                            color: actionColor.text,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {getActionIcon(entry.action)}
                           </div>
-                          {renderChanges(entry.changes)}
+                          <div>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: '0.5rem'
+                            }}>
+                              <span style={{
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                color: '#111827'
+                              }}>
+                                {entry.userName}
+                              </span>
+                              <span style={{
+                                fontSize: '0.875rem',
+                                color: '#6b7280'
+                              }}>
+                                {entry.action}
+                              </span>
+                              <span style={{
+                                fontSize: '0.875rem',
+                                color: '#6b7280'
+                              }}>
+                                {entry.entityType} #{entry.entityId}
+                              </span>
+                            </div>
+                            {renderChanges(entry.changes)}
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{formatTimestamp(entry.timestamp)}</p>
-                        <p className="text-xs text-gray-400">v{entry.version}</p>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{
+                            fontSize: '0.875rem',
+                            color: '#6b7280',
+                            margin: '0 0 0.25rem 0'
+                          }}>
+                            {formatTimestamp(entry.timestamp)}
+                          </p>
+                          <p style={{
+                            fontSize: '0.75rem',
+                            color: '#9ca3af',
+                            margin: 0
+                          }}>
+                            v{entry.version}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
@@ -334,52 +481,139 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
           {/* Version History Tab */}
           {activeTab === 'versions' && (
             <div>
-              <div className="mb-4">
-                <p className="text-sm text-gray-600">
-                  Select two versions to compare changes, or select one to view/revert.
+              <div style={{ marginBottom: '1.5rem' }}>
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: '#6b7280',
+                  margin: 0
+                }}>
+                  Select versions to compare changes or revert to a previous state.
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {versions.map((version) => {
                   const isSelected = selectedVersions.includes(version.versionNumber)
                   return (
                     <div
                       key={version.id}
-                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                        isSelected ? 'border-purple-500 bg-purple-50' : 'hover:border-gray-300'
-                      }`}
+                      style={{
+                        border: isSelected ? '2px solid #7c3aed' : '1px solid #e5e7eb',
+                        backgroundColor: isSelected ? '#f3e8ff' : '#f9fafb',
+                        borderRadius: '8px',
+                        padding: '1.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
                       onClick={() => handleVersionSelect(version.versionNumber)}
+                      onMouseOver={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = '#d1d5db'
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = '#e5e7eb'
+                        }
+                      }}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: '#f3e8ff',
+                            color: '#7c3aed',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
                             <GitBranchIcon />
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">Version {version.versionNumber}</span>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: '0.5rem'
+                            }}>
+                              <span style={{
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                color: '#111827'
+                              }}>
+                                Version {version.versionNumber}
+                              </span>
                               {version.isCurrent && (
-                                <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                <span style={{
+                                  padding: '0.25rem 0.5rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '500',
+                                  backgroundColor: '#ecfdf5',
+                                  color: '#059669',
+                                  borderRadius: '9999px'
+                                }}>
                                   Current
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p style={{
+                              fontSize: '0.875rem',
+                              color: '#6b7280',
+                              margin: '0 0 0.25rem 0'
+                            }}>
                               Created by {version.createdBy} • {formatTimestamp(version.createdAt)}
                             </p>
                             {version.comment && (
-                              <p className="text-sm text-gray-500 mt-1">"{version.comment}"</p>
+                              <p style={{
+                                fontSize: '0.875rem',
+                                color: '#6b7280',
+                                margin: 0,
+                                fontStyle: 'italic'
+                              }}>
+                                "{version.comment}"
+                              </p>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           {!version.isCurrent && (
-                            <button className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-100 rounded">
+                            <button style={{
+                              padding: '0.25rem 0.75rem',
+                              fontSize: '0.875rem',
+                              color: '#7c3aed',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.backgroundColor = '#f3e8ff'
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                            >
                               Revert
                             </button>
                           )}
-                          <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded">
+                          <button style={{
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.875rem',
+                            color: '#6b7280',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f3f4f6'
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                          >
                             View
                           </button>
                         </div>
@@ -391,12 +625,32 @@ export const AuditTrail = ({ entityType, entityId }: AuditTrailProps) => {
 
               {/* Version Comparison */}
               {showDiff && selectedVersions.length === 2 && (
-                <div className="mt-6 border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">
+                <div style={{
+                  marginTop: '2rem',
+                  borderTop: '1px solid #e5e7eb',
+                  paddingTop: '2rem'
+                }}>
+                  <h3 style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: '#111827',
+                    margin: '0 0 1rem 0'
+                  }}>
                     Comparing Version {selectedVersions[0]} → Version {selectedVersions[1]}
                   </h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <pre className="text-sm text-gray-700">
+                  <div style={{
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    border: '1px solid #e5e7eb'
+                  }}>
+                    <pre style={{
+                      fontSize: '0.875rem',
+                      color: '#374151',
+                      margin: 0,
+                      fontFamily: 'monospace',
+                      whiteSpace: 'pre-wrap'
+                    }}>
                       {JSON.stringify({
                         status: { old: 'pending', new: 'in_progress' },
                         responses: { old: 0, new: 5 }

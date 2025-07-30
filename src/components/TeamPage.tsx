@@ -130,20 +130,20 @@ export const TeamPage = () => {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800'
-      case 'manager': return 'bg-blue-100 text-blue-800'
-      case 'reviewer': return 'bg-green-100 text-green-800'
-      case 'labeler': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'admin': return { bg: '#f3e8ff', text: '#7c3aed' }
+      case 'manager': return { bg: '#eff6ff', text: '#2563eb' }
+      case 'reviewer': return { bg: '#ecfdf5', text: '#059669' }
+      case 'labeler': return { bg: '#f3f4f6', text: '#6b7280' }
+      default: return { bg: '#f3f4f6', text: '#6b7280' }
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusInfo = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-600'
-      case 'inactive': return 'text-gray-500'
-      case 'invited': return 'text-yellow-600'
-      default: return 'text-gray-500'
+      case 'active': return { color: '#059669', dotColor: '#10b981' }
+      case 'inactive': return { color: '#6b7280', dotColor: '#9ca3af' }
+      case 'invited': return { color: '#d97706', dotColor: '#f59e0b' }
+      default: return { color: '#6b7280', dotColor: '#9ca3af' }
     }
   }
 
@@ -168,15 +168,53 @@ export const TeamPage = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
-          <p className="text-gray-600">Manage your team members and their roles</p>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Team Management
+          </h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            Manage your team members, roles, and performance
+          </p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#7c3aed',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#6d28d9'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#7c3aed'
+          }}
         >
           <UserPlusIcon />
           Invite Member
@@ -184,15 +222,35 @@ export const TeamPage = () => {
       </div>
 
       {/* Team Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm text-gray-600">Total Members</p>
-              <p className="text-2xl font-bold">{teamMembers.length}</p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem 0' }}>
+                Total Members
+              </p>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', margin: 0 }}>
+                {teamMembers.length}
+              </p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-600">
+            <div style={{
+              backgroundColor: '#f3e8ff',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              color: '#7c3aed'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -202,28 +260,56 @@ export const TeamPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm text-gray-600">Active Now</p>
-              <p className="text-2xl font-bold">{teamMembers.filter(m => m.status === 'active').length}</p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem 0' }}>
+                Active Now
+              </p>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#059669', margin: 0 }}>
+                {teamMembers.filter(m => m.status === 'active').length}
+              </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div style={{
+              backgroundColor: '#ecfdf5',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              color: '#059669'
+            }}>
               <ActivityIcon />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm text-gray-600">Avg Accuracy</p>
-              <p className="text-2xl font-bold">
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem 0' }}>
+                Avg Accuracy
+              </p>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#2563eb', margin: 0 }}>
                 {(teamMembers.reduce((acc, m) => acc + m.accuracy, 0) / teamMembers.filter(m => m.accuracy > 0).length || 0).toFixed(1)}%
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
+            <div style={{
+              backgroundColor: '#eff6ff',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              color: '#2563eb'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
@@ -231,16 +317,29 @@ export const TeamPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-sm text-gray-600">Total Tasks</p>
-              <p className="text-2xl font-bold">
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem 0' }}>
+                Total Tasks
+              </p>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#d97706', margin: 0 }}>
                 {teamMembers.reduce((acc, m) => acc + m.tasksCompleted, 0).toLocaleString()}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-600">
+            <div style={{
+              backgroundColor: '#fef3c7',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              color: '#d97706'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 11H3v10h6V11zM15 3H9v18h6V3zM21 7h-6v14h6V7z"/>
               </svg>
             </div>
@@ -249,85 +348,235 @@ export const TeamPage = () => {
       </div>
 
       {/* Team Members Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e5e7eb' }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            margin: 0
+          }}>
+            Team Members
+          </h2>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ backgroundColor: '#f9fafb' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Member
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Performance
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Joined
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'left',
+                  fontSize: '0.75rem',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {teamMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+            <tbody style={{ backgroundColor: 'white' }}>
+              {teamMembers.map((member, index) => {
+                const roleColor = getRoleBadgeColor(member.role)
+                const statusInfo = getStatusInfo(member.status)
+
+                return (
+                  <tr
+                    key={member.id}
+                    style={{
+                      borderBottom: index < teamMembers.length - 1 ? '1px solid #e5e7eb' : 'none',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f9fafb'
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white'
+                    }}
+                  >
+                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ flexShrink: 0, width: '40px', height: '40px' }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            backgroundColor: '#7c3aed',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            fontWeight: '500'
+                          }}>
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                        </div>
+                        <div style={{ marginLeft: '1rem' }}>
+                          <div style={{
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            color: '#111827'
+                          }}>
+                            {member.name}
+                          </div>
+                          <div style={{
+                            fontSize: '0.875rem',
+                            color: '#6b7280',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            marginTop: '0.25rem'
+                          }}>
+                            <MailIcon />
+                            {member.email}
+                          </div>
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{member.name}</div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
-                          <MailIcon />
-                          {member.email}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(member.role)}`}>
-                      {member.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`text-sm ${getStatusColor(member.status)}`}>
-                      <div className="flex items-center gap-1">
-                        <span className={`w-2 h-2 rounded-full ${
-                          member.status === 'active' ? 'bg-green-500' :
-                          member.status === 'inactive' ? 'bg-gray-400' :
-                          'bg-yellow-500'
-                        }`} />
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <span style={{
+                        padding: '0.25rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        borderRadius: '9999px',
+                        backgroundColor: roleColor.bg,
+                        color: roleColor.text,
+                        textTransform: 'capitalize'
+                      }}>
+                        {member.role}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <div style={{
+                        fontSize: '0.875rem',
+                        color: statusInfo.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: statusInfo.dotColor
+                        }} />
                         {member.lastActive}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <div>{member.tasksCompleted} tasks</div>
-                      {member.accuracy > 0 && (
-                        <div className="text-xs text-gray-500">{member.accuracy}% accuracy</div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {member.joinedAt}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVerticalIcon />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#111827' }}>
+                        <div style={{ fontWeight: '500' }}>
+                          {member.tasksCompleted.toLocaleString()} tasks
+                        </div>
+                        {member.accuracy > 0 && (
+                          <div style={{
+                            fontSize: '0.75rem',
+                            color: '#6b7280',
+                            marginTop: '0.25rem'
+                          }}>
+                            {member.accuracy}% accuracy
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.875rem',
+                      color: '#6b7280'
+                    }}>
+                      {member.joinedAt}
+                    </td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'right'
+                    }}>
+                      <button style={{
+                        color: '#9ca3af',
+                        border: 'none',
+                        backgroundColor: 'transparent',
+                        cursor: 'pointer',
+                        padding: '0.25rem',
+                        borderRadius: '4px',
+                        transition: 'color 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.color = '#6b7280'
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.color = '#9ca3af'
+                      }}
+                      >
+                        <MoreVerticalIcon />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -335,27 +584,82 @@ export const TeamPage = () => {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Invite Team Member</h2>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            width: '100%',
+            maxWidth: '500px',
+            margin: '1rem',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: '#111827',
+              margin: '0 0 1.5rem 0'
+            }}>
+              Invite Team Member
+            </h2>
             <form onSubmit={handleInvite}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Email Address
+                </label>
                 <input
                   type="email"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem'
+                  }}
                   placeholder="colleague@example.com"
                   required
                 />
               </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select 
+              <div style={{ marginBottom: '2rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Role
+                </label>
+                <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    backgroundColor: 'white'
+                  }}
                   required
                 >
                   <option value="">Select a role</option>
@@ -365,17 +669,37 @@ export const TeamPage = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    backgroundColor: '#7c3aed',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
                 >
                   Send Invitation
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancel
                 </button>

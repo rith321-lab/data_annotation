@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react'
 import { ProjectsPage } from './components/ProjectsPage'
 import { TeamPage } from './components/TeamPage'
 import { QualityControl } from './components/QualityControl'
+import { AISuggestions } from './components/AISuggestions'
 import { ReportsPage } from './components/ReportsPage'
 import { WebhookSettings } from './components/WebhookSettings'
+import { SettingsPage } from './components/SettingsPage'
+import { AuthPage } from './components/AuthPage'
+import { apiClient } from './api/client'
 import { NotificationBell } from './components/NotificationCenter'
 import { CollaborationPanel } from './components/CollaborationPanel'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
@@ -105,10 +109,7 @@ const HistoryIcon = () => (
 
 export default function App() {
   const [view, setView] = useState<'home' | 'login' | 'dashboard'>('home')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [activeNav, setActiveNav] = useState('Projects')
   const [currentPage, setCurrentPage] = useState('dashboard')
@@ -295,6 +296,8 @@ export default function App() {
                         setCurrentPage('taskqueue')
                       } else if (item.label === 'Audit Trail') {
                         setCurrentPage('audit')
+                      } else if (item.label === 'Settings') {
+                        setCurrentPage('settings')
                       } else {
                         setCurrentPage('dashboard')
                       }
@@ -474,43 +477,45 @@ export default function App() {
           </header>
 
           {/* Content */}
-          <main style={{ 
-            flex: 1, 
+          <main style={{
+            flex: 1,
             padding: '2rem',
             overflowY: 'auto'
           }}>
-            {currentPage === 'projects' ? (
-              <ProjectsPage />
-            ) : currentPage === 'team' ? (
-              <TeamPage />
-            ) : currentPage === 'quality' ? (
-              <QualityControl />
-            ) : currentPage === 'reports' ? (
-              <ReportsPage />
-            ) : currentPage === 'webhooks' ? (
-              <WebhookSettings />
-            ) : currentPage === 'ai' ? (
-              <div style={{ background: 'white', borderRadius: '16px', padding: '2rem' }}>
-                <h2 style={{ margin: '0 0 2rem 0', color: '#1f2937' }}>AI Suggestions</h2>
-                <p style={{ color: '#6b7280' }}>AI-powered suggestions are integrated into annotation interfaces. Navigate to a project to see them in action.</p>
-              </div>
-            ) : currentPage === 'collaboration' ? (
-              <CollaborationPanel />
-            ) : currentPage === 'analytics' ? (
-              <AnalyticsDashboard />
-            ) : currentPage === 'taskqueue' ? (
-              <TaskQueue />
-            ) : currentPage === 'audit' ? (
-              <AuditTrail />
-            ) : (
-              <>
-            {/* Welcome Card */}
             <div style={{
               background: 'white',
               borderRadius: '16px',
+              minHeight: 'calc(100vh - 8rem)',
+              overflow: 'hidden'
+            }}>
+              {currentPage === 'projects' ? (
+                <ProjectsPage />
+              ) : currentPage === 'team' ? (
+                <TeamPage />
+              ) : currentPage === 'quality' ? (
+                <QualityControl />
+              ) : currentPage === 'reports' ? (
+                <ReportsPage />
+              ) : currentPage === 'webhooks' ? (
+                <WebhookSettings />
+              ) : currentPage === 'ai' ? (
+                <AISuggestions />
+              ) : currentPage === 'collaboration' ? (
+                <CollaborationPanel />
+              ) : currentPage === 'analytics' ? (
+                <AnalyticsDashboard />
+              ) : currentPage === 'taskqueue' ? (
+                <TaskQueue />
+              ) : currentPage === 'audit' ? (
+                <AuditTrail />
+              ) : currentPage === 'settings' ? (
+                <SettingsPage />
+              ) : (
+              <>
+            {/* Welcome Card */}
+            <div style={{
               padding: '3rem',
-              marginBottom: '2rem',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+              marginBottom: '2rem'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                 <div style={{
@@ -580,10 +585,8 @@ export default function App() {
 
             {/* Active Contributors */}
             <div style={{
-              background: 'white',
-              borderRadius: '16px',
               padding: '2rem',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+              borderTop: '1px solid #e5e7eb'
             }}>
               <div style={{ 
                 display: 'flex', 
@@ -688,6 +691,7 @@ export default function App() {
             </div>
               </>
             )}
+            </div>
           </main>
         </div>
       </div>
@@ -695,6 +699,13 @@ export default function App() {
   }
 
   if (view === 'login') {
+    return (
+      <AuthPage onAuthSuccess={() => setView('dashboard')} />
+    )
+  }
+
+  // Return to home view if not authenticated
+  if (view === 'home') {
     return (
       <div style={{ 
         minHeight: '100vh',

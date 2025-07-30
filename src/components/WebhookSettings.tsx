@@ -181,15 +181,53 @@ export const WebhookSettings = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Webhook Settings</h1>
-          <p className="text-gray-600">Configure webhooks to receive real-time notifications</p>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Webhook Settings
+          </h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            Configure webhooks to receive real-time notifications and integrate with external services
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#7c3aed',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#6d28d9'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#7c3aed'
+          }}
         >
           <PlusIcon />
           Add Webhook
@@ -197,49 +235,121 @@ export const WebhookSettings = () => {
       </div>
 
       {/* Webhook List */}
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {webhooks.map((webhook) => (
-          <div key={webhook.id} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-semibold">{webhook.name}</h3>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    webhook.active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
+          <div key={webhook.id} style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: '2rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '1rem'
+                }}>
+                  <h3 style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: '#111827',
+                    margin: 0
+                  }}>
+                    {webhook.name}
+                  </h3>
+                  <span style={{
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    borderRadius: '9999px',
+                    backgroundColor: webhook.active ? '#ecfdf5' : '#f3f4f6',
+                    color: webhook.active ? '#059669' : '#6b7280'
+                  }}>
                     {webhook.active ? 'Active' : 'Inactive'}
                   </span>
                   {webhook.failureCount > 0 && (
-                    <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                    <span style={{
+                      padding: '0.25rem 0.75rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      backgroundColor: '#fef2f2',
+                      color: '#dc2626',
+                      borderRadius: '9999px'
+                    }}>
                       {webhook.failureCount} failures
                     </span>
                   )}
                 </div>
-                
-                <p className="text-sm text-gray-600 mb-3">{webhook.url}</p>
-                
-                <div className="flex flex-wrap gap-2 mb-3">
+
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: '#6b7280',
+                  margin: '0 0 1rem 0',
+                  fontFamily: 'monospace',
+                  backgroundColor: '#f9fafb',
+                  padding: '0.5rem',
+                  borderRadius: '4px'
+                }}>
+                  {webhook.url}
+                </p>
+
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem',
+                  marginBottom: '1rem'
+                }}>
                   {webhook.events.map((event) => (
-                    <span key={event} className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">
+                    <span key={event} style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      backgroundColor: '#f3e8ff',
+                      color: '#7c3aed',
+                      borderRadius: '4px'
+                    }}>
                       {AVAILABLE_EVENTS.find(e => e.value === event)?.label || event}
                     </span>
                   ))}
                 </div>
 
                 {webhook.lastTriggered && (
-                  <p className="text-xs text-gray-500">
+                  <p style={{
+                    fontSize: '0.75rem',
+                    color: '#9ca3af',
+                    margin: 0
+                  }}>
                     Last triggered: {webhook.lastTriggered}
                   </p>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   onClick={() => handleTestWebhook(webhook)}
                   disabled={testingWebhook === webhook.id}
-                  className="p-2 text-purple-600 hover:bg-purple-50 rounded disabled:opacity-50"
+                  style={{
+                    padding: '0.5rem',
+                    color: testingWebhook === webhook.id ? '#9ca3af' : '#7c3aed',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: testingWebhook === webhook.id ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    if (testingWebhook !== webhook.id) {
+                      e.currentTarget.style.backgroundColor = '#f3e8ff'
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (testingWebhook !== webhook.id) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
+                  }}
                   title="Test webhook"
                 >
                   <TestIcon />
@@ -255,14 +365,42 @@ export const WebhookSettings = () => {
                       active: webhook.active
                     })
                   }}
-                  className="p-2 text-gray-600 hover:bg-gray-50 rounded"
+                  style={{
+                    padding: '0.5rem',
+                    color: '#6b7280',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
                   title="Edit webhook"
                 >
                   <EditIcon />
                 </button>
                 <button
                   onClick={() => handleDeleteWebhook(webhook.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                  style={{
+                    padding: '0.5rem',
+                    color: '#dc2626',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fef2f2'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
                   title="Delete webhook"
                 >
                   <TrashIcon />
@@ -275,115 +413,260 @@ export const WebhookSettings = () => {
 
       {/* Add/Edit Modal */}
       {(showAddModal || editingWebhook) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            width: '100%',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            margin: '1rem',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: '#111827',
+              margin: '0 0 1.5rem 0'
+            }}>
               {editingWebhook ? 'Edit Webhook' : 'Add Webhook'}
             </h2>
-            
+
             <form onSubmit={(e) => {
               e.preventDefault()
               editingWebhook ? handleUpdateWebhook() : handleAddWebhook()
             }}>
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem'
+                    }}
                     placeholder="e.g., Slack Notifications"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Webhook URL
+                  </label>
                   <input
                     type="url"
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem'
+                    }}
                     placeholder="https://example.com/webhook"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Events</label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Events
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    padding: '1rem'
+                  }}>
                     {AVAILABLE_EVENTS.map((event) => (
-                      <label key={event.value} className="flex items-center">
+                      <label key={event.value} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer'
+                      }}>
                         <input
                           type="checkbox"
                           checked={formData.events.includes(event.value)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setFormData({ 
-                                ...formData, 
+                              setFormData({
+                                ...formData,
                                 events: [...formData.events, event.value]
                               })
                             } else {
-                              setFormData({ 
-                                ...formData, 
+                              setFormData({
+                                ...formData,
                                 events: formData.events.filter(ev => ev !== event.value)
                               })
                             }
                           }}
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            accentColor: '#7c3aed',
+                            marginRight: '0.5rem'
+                          }}
                         />
-                        <span className="ml-2 text-sm">{event.label}</span>
+                        <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                          {event.label}
+                        </span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Headers</label>
-                  <div className="space-y-2">
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Headers
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {Object.entries(formData.headers).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-2">
+                      <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <input
                           type="text"
                           value={key}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                          style={{
+                            flex: 1,
+                            padding: '0.75rem',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '6px',
+                            backgroundColor: '#f9fafb',
+                            fontSize: '0.875rem'
+                          }}
                           disabled
                         />
                         <input
                           type="text"
                           value={value}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                          style={{
+                            flex: 1,
+                            padding: '0.75rem',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '6px',
+                            backgroundColor: '#f9fafb',
+                            fontSize: '0.875rem'
+                          }}
                           disabled
                         />
                         <button
                           type="button"
                           onClick={() => removeHeader(key)}
-                          className="text-red-600 hover:text-red-800"
+                          style={{
+                            color: '#dc2626',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.5rem',
+                            borderRadius: '4px',
+                            transition: 'color 0.2s ease'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.color = '#b91c1c'
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.color = '#dc2626'
+                          }}
                         >
                           ✕
                         </button>
                       </div>
                     ))}
-                    <div className="flex items-center gap-2">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <input
                         type="text"
                         value={newHeaderKey}
                         onChange={(e) => setNewHeaderKey(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                        style={{
+                          flex: 1,
+                          padding: '0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem'
+                        }}
                         placeholder="Header name"
                       />
                       <input
                         type="text"
                         value={newHeaderValue}
                         onChange={(e) => setNewHeaderValue(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                        style={{
+                          flex: 1,
+                          padding: '0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem'
+                        }}
                         placeholder="Header value"
                       />
                       <button
                         type="button"
                         onClick={addHeader}
-                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        style={{
+                          padding: '0.75rem',
+                          backgroundColor: '#e5e7eb',
+                          color: '#374151',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = '#d1d5db'
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = '#e5e7eb'
+                        }}
                       >
                         Add
                       </button>
@@ -392,22 +675,50 @@ export const WebhookSettings = () => {
                 </div>
 
                 <div>
-                  <label className="flex items-center">
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}>
                     <input
                       type="checkbox"
                       checked={formData.active}
                       onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        accentColor: '#7c3aed',
+                        marginRight: '0.5rem'
+                      }}
                     />
-                    <span className="ml-2 text-sm">Active</span>
+                    <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                      Active
+                    </span>
                   </label>
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-2">
+              <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem' }}>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#7c3aed',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#6d28d9'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = '#7c3aed'
+                  }}
                 >
                   {editingWebhook ? 'Update Webhook' : 'Create Webhook'}
                 </button>
@@ -418,7 +729,24 @@ export const WebhookSettings = () => {
                     setEditingWebhook(null)
                     resetForm()
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem 1rem',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f9fafb'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white'
+                  }}
                 >
                   Cancel
                 </button>

@@ -93,27 +93,58 @@ export const ReportsPage = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-gray-600">Generate and export detailed reports</p>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: '#111827',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Reports & Analytics
+          </h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            margin: 0
+          }}>
+            Generate and export detailed reports with custom analytics
+          </p>
         </div>
-        <div className="flex gap-2">
-          <select 
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+            style={{
+              padding: '0.5rem 0.75rem',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              backgroundColor: 'white'
+            }}
           >
             <option value="last-7-days">Last 7 days</option>
             <option value="last-30-days">Last 30 days</option>
             <option value="last-90-days">Last 90 days</option>
             <option value="custom">Custom range</option>
           </select>
-          <select 
+          <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+            style={{
+              padding: '0.5rem 0.75rem',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              backgroundColor: 'white'
+            }}
           >
             <option value="all">All Projects</option>
             <option value="1">Image Classification</option>
@@ -124,139 +155,360 @@ export const ReportsPage = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Total Tasks</h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-600">
-              <path d="M9 11H3v10h6V11zM15 3H9v18h6V3zM21 7h-6v14h6V7z"/>
-            </svg>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#6b7280', margin: 0 }}>
+              Total Tasks
+            </h3>
+            <div style={{ color: '#7c3aed' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 11H3v10h6V11zM15 3H9v18h6V3zM21 7h-6v14h6V7z"/>
+              </svg>
+            </div>
           </div>
-          <p className="text-2xl font-bold">12,458</p>
-          <p className="text-xs text-green-600">+15% from last month</p>
+          <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', margin: '0 0 0.25rem 0' }}>
+            12,458
+          </p>
+          <p style={{ fontSize: '0.75rem', color: '#059669', margin: 0 }}>
+            +15% from last month
+          </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Active Workers</h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#6b7280', margin: 0 }}>
+              Active Workers
+            </h3>
+            <div style={{ color: '#2563eb' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
           </div>
-          <p className="text-2xl font-bold">63</p>
-          <p className="text-xs text-green-600">+8% from last month</p>
+          <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', margin: '0 0 0.25rem 0' }}>
+            63
+          </p>
+          <p style={{ fontSize: '0.75rem', color: '#059669', margin: 0 }}>
+            +8% from last month
+          </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Avg Accuracy</h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#6b7280', margin: 0 }}>
+              Avg Accuracy
+            </h3>
+            <div style={{ color: '#059669' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
           </div>
-          <p className="text-2xl font-bold">94.2%</p>
-          <p className="text-xs text-red-600">-0.5% from last month</p>
+          <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', margin: '0 0 0.25rem 0' }}>
+            94.2%
+          </p>
+          <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: 0 }}>
+            -0.5% from last month
+          </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Total Cost</h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-600">
-              <line x1="12" y1="1" x2="12" y2="23"/>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#6b7280', margin: 0 }}>
+              Total Cost
+            </h3>
+            <div style={{ color: '#d97706' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
           </div>
-          <p className="text-2xl font-bold">$4,892</p>
-          <p className="text-xs text-green-600">-12% from last month</p>
+          <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827', margin: '0 0 0.25rem 0' }}>
+            $4,892
+          </p>
+          <p style={{ fontSize: '0.75rem', color: '#059669', margin: 0 }}>
+            -12% from last month
+          </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b">
-          <nav className="flex -mb-px">
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: '#f9fafb'
+        }}>
+          <nav style={{ display: 'flex' }}>
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-6 py-3 text-sm font-medium ${
-                activeTab === 'overview'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              style={{
+                padding: '1rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                backgroundColor: activeTab === 'overview' ? 'white' : 'transparent',
+                color: activeTab === 'overview' ? '#111827' : '#6b7280',
+                borderBottom: activeTab === 'overview' ? '2px solid #7c3aed' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (activeTab !== 'overview') {
+                  e.currentTarget.style.color = '#374151'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeTab !== 'overview') {
+                  e.currentTarget.style.color = '#6b7280'
+                }
+              }}
             >
               Overview
             </button>
             <button
               onClick={() => setActiveTab('custom')}
-              className={`px-6 py-3 text-sm font-medium ${
-                activeTab === 'custom'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              style={{
+                padding: '1rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                backgroundColor: activeTab === 'custom' ? 'white' : 'transparent',
+                color: activeTab === 'custom' ? '#111827' : '#6b7280',
+                borderBottom: activeTab === 'custom' ? '2px solid #7c3aed' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (activeTab !== 'custom') {
+                  e.currentTarget.style.color = '#374151'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeTab !== 'custom') {
+                  e.currentTarget.style.color = '#6b7280'
+                }
+              }}
             >
               Custom Reports
             </button>
             <button
               onClick={() => setActiveTab('scheduled')}
-              className={`px-6 py-3 text-sm font-medium ${
-                activeTab === 'scheduled'
-                  ? 'border-b-2 border-purple-500 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              style={{
+                padding: '1rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                backgroundColor: activeTab === 'scheduled' ? 'white' : 'transparent',
+                color: activeTab === 'scheduled' ? '#111827' : '#6b7280',
+                borderBottom: activeTab === 'scheduled' ? '2px solid #7c3aed' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                if (activeTab !== 'scheduled') {
+                  e.currentTarget.style.color = '#374151'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeTab !== 'scheduled') {
+                  e.currentTarget.style.color = '#6b7280'
+                }
+              }}
             >
               Scheduled Reports
             </button>
           </nav>
         </div>
 
-        <div className="p-6">
+        <div style={{ padding: '2rem' }}>
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {/* Tasks by Project Chart */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Tasks by Project</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: '0 0 1.5rem 0'
+                }}>
+                  Tasks by Project
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '2rem'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {projectStats.map((project) => (
                       <div key={project.label}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{project.label}</span>
-                          <span className="font-medium">{project.value.toLocaleString()}</span>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '0.875rem',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <span style={{ color: '#374151' }}>{project.label}</span>
+                          <span style={{ fontWeight: '500', color: '#111827' }}>
+                            {project.value.toLocaleString()}
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div 
-                            className="bg-purple-600 h-3 rounded-full" 
-                            style={{ width: `${(project.value / 5000) * 100}%` }}
-                          />
+                        <div style={{
+                          width: '100%',
+                          height: '12px',
+                          backgroundColor: '#e5e7eb',
+                          borderRadius: '6px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            width: `${(project.value / 5000) * 100}%`,
+                            height: '100%',
+                            backgroundColor: '#7c3aed',
+                            borderRadius: '6px',
+                            transition: 'width 0.3s ease'
+                          }} />
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-medium mb-2">Quick Actions</h4>
-                    <div className="space-y-2">
+                  <div style={{
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    border: '1px solid #e5e7eb'
+                  }}>
+                    <h4 style={{
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      color: '#111827',
+                      margin: '0 0 1rem 0'
+                    }}>
+                      Quick Actions
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <button
                         onClick={() => generateReport('Performance')}
                         disabled={generatingReport}
-                        className="w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50 disabled:opacity-50"
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.75rem',
+                          backgroundColor: 'white',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          cursor: generatingReport ? 'not-allowed' : 'pointer',
+                          opacity: generatingReport ? 0.5 : 1,
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = '#f9fafb'
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = 'white'
+                          }
+                        }}
                       >
                         Generate Performance Report
                       </button>
                       <button
                         onClick={() => generateReport('Financial')}
                         disabled={generatingReport}
-                        className="w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50 disabled:opacity-50"
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.75rem',
+                          backgroundColor: 'white',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          cursor: generatingReport ? 'not-allowed' : 'pointer',
+                          opacity: generatingReport ? 0.5 : 1,
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = '#f9fafb'
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = 'white'
+                          }
+                        }}
                       >
                         Generate Financial Report
                       </button>
                       <button
                         onClick={() => generateReport('Quality')}
                         disabled={generatingReport}
-                        className="w-full text-left px-3 py-2 bg-white rounded border hover:bg-gray-50 disabled:opacity-50"
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.75rem',
+                          backgroundColor: 'white',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          cursor: generatingReport ? 'not-allowed' : 'pointer',
+                          opacity: generatingReport ? 0.5 : 1,
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = '#f9fafb'
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (!generatingReport) {
+                            e.currentTarget.style.backgroundColor = 'white'
+                          }
+                        }}
                       >
                         Generate Quality Report
                       </button>
@@ -267,46 +519,159 @@ export const ReportsPage = () => {
 
               {/* Recent Reports */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Recent Reports</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Report Name</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Generated</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {recentReports.map((report) => (
-                        <tr key={report.id}>
-                          <td className="px-4 py-3 text-sm">{report.name}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              report.type === 'quality' ? 'bg-green-100 text-green-800' :
-                              report.type === 'worker' ? 'bg-blue-100 text-blue-800' :
-                              report.type === 'financial' ? 'bg-orange-100 text-orange-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {report.type}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-500">{report.generatedAt}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500">{report.size}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <button
-                              onClick={() => downloadReport(report)}
-                              className="text-purple-600 hover:text-purple-800"
-                            >
-                              <DownloadIcon />
-                            </button>
-                          </td>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: '0 0 1.5rem 0'
+                }}>
+                  Recent Reports
+                </h3>
+                <div style={{
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead style={{ backgroundColor: '#f3f4f6' }}>
+                        <tr>
+                          <th style={{
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            color: '#6b7280',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Report Name
+                          </th>
+                          <th style={{
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            color: '#6b7280',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Type
+                          </th>
+                          <th style={{
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            color: '#6b7280',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Generated
+                          </th>
+                          <th style={{
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            color: '#6b7280',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Size
+                          </th>
+                          <th style={{
+                            padding: '1rem 1.5rem',
+                            textAlign: 'left',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            color: '#6b7280',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Actions
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody style={{ backgroundColor: 'white' }}>
+                        {recentReports.map((report, index) => {
+                          const getTypeColor = (type: string) => {
+                            switch (type) {
+                              case 'quality': return { bg: '#ecfdf5', text: '#059669' }
+                              case 'worker': return { bg: '#eff6ff', text: '#2563eb' }
+                              case 'financial': return { bg: '#fff7ed', text: '#ea580c' }
+                              default: return { bg: '#f3f4f6', text: '#6b7280' }
+                            }
+                          }
+                          const typeColor = getTypeColor(report.type)
+
+                          return (
+                            <tr key={report.id} style={{
+                              borderBottom: index < recentReports.length - 1 ? '1px solid #e5e7eb' : 'none'
+                            }}>
+                              <td style={{
+                                padding: '1rem 1.5rem',
+                                fontSize: '0.875rem',
+                                color: '#111827'
+                              }}>
+                                {report.name}
+                              </td>
+                              <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
+                                <span style={{
+                                  padding: '0.25rem 0.75rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '500',
+                                  borderRadius: '9999px',
+                                  backgroundColor: typeColor.bg,
+                                  color: typeColor.text,
+                                  textTransform: 'capitalize'
+                                }}>
+                                  {report.type}
+                                </span>
+                              </td>
+                              <td style={{
+                                padding: '1rem 1.5rem',
+                                fontSize: '0.875rem',
+                                color: '#6b7280'
+                              }}>
+                                {report.generatedAt}
+                              </td>
+                              <td style={{
+                                padding: '1rem 1.5rem',
+                                fontSize: '0.875rem',
+                                color: '#6b7280'
+                              }}>
+                                {report.size}
+                              </td>
+                              <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
+                                <button
+                                  onClick={() => downloadReport(report)}
+                                  style={{
+                                    color: '#7c3aed',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '0.25rem',
+                                    borderRadius: '4px',
+                                    transition: 'color 0.2s ease'
+                                  }}
+                                  onMouseOver={(e) => {
+                                    e.currentTarget.style.color = '#6d28d9'
+                                  }}
+                                  onMouseOut={(e) => {
+                                    e.currentTarget.style.color = '#7c3aed'
+                                  }}
+                                >
+                                  <DownloadIcon />
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -315,15 +680,41 @@ export const ReportsPage = () => {
           {/* Custom Reports Tab */}
           {activeTab === 'custom' && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Create Custom Report</h3>
-              <form className="space-y-4" onSubmit={(e) => {
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: '#111827',
+                margin: '0 0 1.5rem 0'
+              }}>
+                Create Custom Report
+              </h3>
+              <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={(e) => {
                 e.preventDefault()
                 generateReport('Custom')
               }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                  gap: '1.5rem'
+                }}>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500">
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Report Type
+                    </label>
+                    <select style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: 'white'
+                    }}>
                       <option value="comprehensive">Comprehensive Analysis</option>
                       <option value="worker">Worker Performance</option>
                       <option value="project">Project Summary</option>
@@ -332,8 +723,23 @@ export const ReportsPage = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500">
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Format
+                    </label>
+                    <select style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: 'white'
+                    }}>
                       <option value="pdf">PDF</option>
                       <option value="excel">Excel</option>
                       <option value="csv">CSV</option>
@@ -343,23 +749,74 @@ export const ReportsPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Include Sections</label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Executive Summary</span>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.75rem'
+                  }}>
+                    Include Sections
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                        Executive Summary
+                      </span>
                     </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Detailed Analytics</span>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                        Detailed Analytics
+                      </span>
                     </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Worker Performance</span>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                        Worker Performance
+                      </span>
                     </label>
-                    <label className="flex items-center">
-                      <input type="checkbox" className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Financial Breakdown</span>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                        Financial Breakdown
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -367,7 +824,28 @@ export const ReportsPage = () => {
                 <button
                   type="submit"
                   disabled={generatingReport}
-                  className="w-full md:w-auto px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
+                  style={{
+                    width: 'fit-content',
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: generatingReport ? '#9ca3af' : '#7c3aed',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: generatingReport ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    if (!generatingReport) {
+                      e.currentTarget.style.backgroundColor = '#6d28d9'
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!generatingReport) {
+                      e.currentTarget.style.backgroundColor = '#7c3aed'
+                    }
+                  }}
                 >
                   {generatingReport ? 'Generating...' : 'Generate Report'}
                 </button>
@@ -378,38 +856,133 @@ export const ReportsPage = () => {
           {/* Scheduled Reports Tab */}
           {activeTab === 'scheduled' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Scheduled Reports</h3>
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  margin: 0
+                }}>
+                  Scheduled Reports
+                </h3>
+                <button style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#7c3aed',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#6d28d9'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#7c3aed'
+                }}
+                >
                   Schedule New Report
                 </button>
               </div>
-              
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '1.5rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <h4 className="font-medium">Weekly Performance Report</h4>
-                      <p className="text-sm text-gray-600 mt-1">Every Monday at 9:00 AM</p>
-                      <p className="text-sm text-gray-500">Recipients: team@company.com</p>
+                      <h4 style={{
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        color: '#111827',
+                        margin: '0 0 0.5rem 0'
+                      }}>
+                        Weekly Performance Report
+                      </h4>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        Every Monday at 9:00 AM
+                      </p>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#9ca3af',
+                        margin: 0
+                      }}>
+                        Recipients: team@company.com
+                      </p>
                     </div>
-                    <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Active</span>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>Active</span>
                     </label>
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
+                <div style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '1.5rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <h4 className="font-medium">Monthly Financial Summary</h4>
-                      <p className="text-sm text-gray-600 mt-1">1st of every month at 8:00 AM</p>
-                      <p className="text-sm text-gray-500">Recipients: finance@company.com, cfo@company.com</p>
+                      <h4 style={{
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        color: '#111827',
+                        margin: '0 0 0.5rem 0'
+                      }}>
+                        Monthly Financial Summary
+                      </h4>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        1st of every month at 8:00 AM
+                      </p>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: '#9ca3af',
+                        margin: 0
+                      }}>
+                        Recipients: finance@company.com, cfo@company.com
+                      </p>
                     </div>
-                    <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
-                      <span className="ml-2 text-sm">Active</span>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          accentColor: '#7c3aed',
+                          marginRight: '0.5rem'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.875rem', color: '#374151' }}>Active</span>
                     </label>
                   </div>
                 </div>
