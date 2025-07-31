@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, Field
 
 from app.models.question import QuestionType
 
@@ -51,8 +51,8 @@ class QuestionUpdate(BaseModel):
 
 
 class QuestionInDBBase(QuestionBase):
-    id: UUID4
-    project_id: UUID4
+    id: str
+    project_id: str
     
     class Config:
         from_attributes = True

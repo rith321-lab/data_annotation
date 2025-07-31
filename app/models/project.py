@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Text, Boolean, Integer, Float, ForeignKey, Enum, JSON, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -31,29 +30,29 @@ class ProjectType(str, enum.Enum):
 project_teams = Table(
     'project_teams',
     Base.metadata,
-    Column('project_id', UUID(as_uuid=True), ForeignKey('projects.id')),
-    Column('team_id', UUID(as_uuid=True), ForeignKey('teams.id'))
+    Column('project_id', String, ForeignKey('projects.id')),
+    Column('team_id', String, ForeignKey('teams.id'))
 )
 
 
 class Project(Base):
     __tablename__ = "projects"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     slug = Column(String, unique=True, index=True, nullable=False)
     description = Column(Text)
     instructions = Column(Text, nullable=False)
-    
+
     # Type and status
     project_type = Column(Enum(ProjectType), default=ProjectType.CLASSIFICATION)
     status = Column(Enum(ProjectStatus), default=ProjectStatus.DRAFT, index=True)
-    
+
     # Organization and creator
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False)
+    organization_id = Column(String, ForeignKey("organizations.id"), nullable=False)
     organization = relationship("Organization", back_populates="projects")
-    
-    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+
+    creator_id = Column(String, ForeignKey("users.id"), nullable=False)
     creator = relationship("User", back_populates="created_projects")
     
     # Settings

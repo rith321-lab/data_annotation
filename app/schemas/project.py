@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 from app.models.project import ProjectStatus, ProjectType
@@ -23,11 +23,11 @@ class ProjectBase(BaseModel):
     require_qualification: bool = False
     qualification_requirements: Dict[str, Any] = {}
     tags: List[str] = []
-    metadata: Dict[str, Any] = {}
+    project_metadata: Dict[str, Any] = {}
 
 
 class ProjectCreate(ProjectBase):
-    team_ids: Optional[List[UUID4]] = []
+    team_ids: Optional[List[str]] = []
 
 
 class ProjectUpdate(BaseModel):
@@ -46,17 +46,17 @@ class ProjectUpdate(BaseModel):
     require_qualification: Optional[bool] = None
     qualification_requirements: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    project_metadata: Optional[Dict[str, Any]] = None
     custom_css: Optional[str] = None
     custom_javascript: Optional[str] = None
     theme_settings: Optional[Dict[str, Any]] = None
 
 
 class ProjectInDBBase(ProjectBase):
-    id: UUID4
+    id: str
     status: ProjectStatus
-    organization_id: UUID4
-    creator_id: UUID4
+    organization_id: str
+    creator_id: str
     total_tasks: int = 0
     completed_tasks: int = 0
     total_responses: int = 0

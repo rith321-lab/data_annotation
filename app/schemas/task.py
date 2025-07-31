@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 from app.models.task import TaskStatus, TaskPriority
@@ -8,15 +8,15 @@ from app.models.task import TaskStatus, TaskPriority
 class TaskBase(BaseModel):
     external_id: Optional[str] = None
     data: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = {}
+    task_metadata: Optional[Dict[str, Any]] = {}
     priority: TaskPriority = TaskPriority.MEDIUM
     is_gold_standard: bool = False
     gold_standard_answers: Optional[Dict[str, Any]] = None
     preexisting_annotations: Optional[Dict[str, Any]] = None
     required_responses: int = Field(default=3, ge=1)
     batch_id: Optional[str] = None
-    exclusive_worker_ids: Optional[List[UUID4]] = None
-    excluded_worker_ids: Optional[List[UUID4]] = None
+    exclusive_worker_ids: Optional[List[str]] = None
+    excluded_worker_ids: Optional[List[str]] = None
     expires_at: Optional[str] = None
 
 
@@ -39,8 +39,8 @@ class TaskUpdate(BaseModel):
 
 
 class TaskInDBBase(TaskBase):
-    id: UUID4
-    project_id: UUID4
+    id: str
+    project_id: str
     status: TaskStatus
     completed_responses: int = 0
     consensus_score: Optional[float] = None

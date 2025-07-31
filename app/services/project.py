@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -18,8 +17,8 @@ class ProjectService:
     async def create(
         db: AsyncSession,
         obj_in: ProjectCreate,
-        creator_id: UUID,
-        organization_id: UUID
+        creator_id: str,
+        organization_id: str
     ) -> Project:
         # Check if slug is unique
         result = await db.execute(
@@ -57,7 +56,7 @@ class ProjectService:
         return db_project
     
     @staticmethod
-    async def get(db: AsyncSession, project_id: UUID) -> Optional[Project]:
+    async def get(db: AsyncSession, project_id: str) -> Optional[Project]:
         result = await db.execute(
             select(Project)
             .options(selectinload(Project.questions))
@@ -77,7 +76,7 @@ class ProjectService:
     @staticmethod
     async def list_organization_projects(
         db: AsyncSession,
-        organization_id: UUID,
+        organization_id: str,
         skip: int = 0,
         limit: int = 100,
         status: Optional[ProjectStatus] = None

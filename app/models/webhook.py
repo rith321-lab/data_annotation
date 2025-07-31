@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, Enum, JSON
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -26,10 +25,10 @@ class WebhookEventType(str, enum.Enum):
 class Webhook(Base):
     __tablename__ = "webhooks"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Organization
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False)
+    organization_id = Column(String, ForeignKey("organizations.id"), nullable=False)
     organization = relationship("Organization", back_populates="webhooks")
     
     # Webhook configuration
@@ -64,10 +63,10 @@ class Webhook(Base):
 class WebhookEvent(Base):
     __tablename__ = "webhook_events"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Webhook
-    webhook_id = Column(UUID(as_uuid=True), ForeignKey("webhooks.id"), nullable=False)
+    webhook_id = Column(String, ForeignKey("webhooks.id"), nullable=False)
     webhook = relationship("Webhook", back_populates="webhook_events")
     
     # Event details
@@ -75,7 +74,7 @@ class WebhookEvent(Base):
     payload = Column(JSON, nullable=False)
     
     # Related entities
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"))
+    project_id = Column(String, ForeignKey("projects.id"))
     project = relationship("Project", back_populates="webhook_events")
     
     # Delivery status

@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -17,12 +16,12 @@ class TeamRole(str, enum.Enum):
 class Team(Base):
     __tablename__ = "teams"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     description = Column(String)
     
     # Organization
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False)
+    organization_id = Column(String, ForeignKey("organizations.id"), nullable=False)
     organization = relationship("Organization", back_populates="teams")
     
     # Settings
@@ -41,14 +40,14 @@ class Team(Base):
 class TeamMember(Base):
     __tablename__ = "team_members"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # User
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="team_memberships")
     
     # Team
-    team_id = Column(UUID(as_uuid=True), ForeignKey("teams.id"), nullable=False)
+    team_id = Column(String, ForeignKey("teams.id"), nullable=False)
     team = relationship("Team", back_populates="members")
     
     # Role

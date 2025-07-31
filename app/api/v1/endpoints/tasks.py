@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Dict
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import status as http_status
 from sqlalchemy.ext.asyncio import AsyncSession
 import csv
 import io
@@ -8,7 +8,7 @@ import json
 
 from app.core.deps import get_current_active_user, get_db
 from app.models.user import User
-from app.models.task import TaskStatus
+from app.models.task import TaskStatus as TaskStatusEnum
 from app.schemas.task import (
     Task, TaskCreate, TaskUpdate, TaskBulkCreate, TaskWithResponses, TaskStats
 )
@@ -20,7 +20,7 @@ router = APIRouter()
 
 @router.post("/projects/{project_id}/tasks", response_model=Task)
 async def create_task(
-    project_id: UUID,
+    project_id: str,
     task_in: TaskCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -30,13 +30,13 @@ async def create_task(
     project = await ProjectService.get(db, project_id=project_id)
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -46,7 +46,7 @@ async def create_task(
 
 @router.post("/projects/{project_id}/tasks/bulk", response_model=List[Task])
 async def create_tasks_bulk(
-    project_id: UUID,
+    project_id: str,
     tasks_in: TaskBulkCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -56,13 +56,13 @@ async def create_tasks_bulk(
     project = await ProjectService.get(db, project_id=project_id)
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -74,7 +74,7 @@ async def create_tasks_bulk(
 
 @router.post("/projects/{project_id}/tasks/csv")
 async def upload_tasks_csv(
-    project_id: UUID,
+    project_id: str,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -84,13 +84,13 @@ async def upload_tasks_csv(
     project = await ProjectService.get(db, project_id=project_id)
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -119,11 +119,11 @@ async def upload_tasks_csv(
 
 @router.get("/projects/{project_id}/tasks", response_model=List[Task])
 async def list_project_tasks(
-    project_id: UUID,
+    project_id: str,
     db: AsyncSession = Depends(get_db),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=100),
-    status: Optional[TaskStatus] = None,
+    status: Optional[TaskStatusEnum] = None,
     batch_id: Optional[str] = None,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -132,13 +132,13 @@ async def list_project_tasks(
     project = await ProjectService.get(db, project_id=project_id)
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -155,7 +155,7 @@ async def list_project_tasks(
 
 @router.get("/projects/{project_id}/tasks/stats", response_model=TaskStats)
 async def get_project_task_stats(
-    project_id: UUID,
+    project_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -164,13 +164,13 @@ async def get_project_task_stats(
     project = await ProjectService.get(db, project_id=project_id)
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
     
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -180,7 +180,7 @@ async def get_project_task_stats(
 
 @router.get("/tasks/{task_id}", response_model=TaskWithResponses)
 async def get_task(
-    task_id: UUID,
+    task_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -188,7 +188,7 @@ async def get_task(
     task = await TaskService.get(db, task_id=task_id)
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Task not found"
         )
     
@@ -196,7 +196,7 @@ async def get_task(
     project = await ProjectService.get(db, project_id=task.project_id)
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -228,7 +228,7 @@ async def get_task(
 
 @router.put("/tasks/{task_id}", response_model=Task)
 async def update_task(
-    task_id: UUID,
+    task_id: str,
     task_in: TaskUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -237,7 +237,7 @@ async def update_task(
     task = await TaskService.get(db, task_id=task_id)
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Task not found"
         )
     
@@ -245,7 +245,7 @@ async def update_task(
     project = await ProjectService.get(db, project_id=task.project_id)
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -255,7 +255,7 @@ async def update_task(
 
 @router.post("/tasks/{task_id}/gold-standard", response_model=Task)
 async def set_gold_standard(
-    task_id: UUID,
+    task_id: str,
     gold_answers: Dict[str, Any],
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -264,7 +264,7 @@ async def set_gold_standard(
     task = await TaskService.get(db, task_id=task_id)
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Task not found"
         )
     
@@ -272,7 +272,7 @@ async def set_gold_standard(
     project = await ProjectService.get(db, project_id=task.project_id)
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     
@@ -282,7 +282,7 @@ async def set_gold_standard(
 
 @router.delete("/tasks/{task_id}")
 async def delete_task(
-    task_id: UUID,
+    task_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -290,7 +290,7 @@ async def delete_task(
     task = await TaskService.get(db, task_id=task_id)
     if not task:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Task not found"
         )
     
@@ -298,7 +298,7 @@ async def delete_task(
     project = await ProjectService.get(db, project_id=task.project_id)
     if project.organization_id != current_user.organization_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=http_status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
         )
     

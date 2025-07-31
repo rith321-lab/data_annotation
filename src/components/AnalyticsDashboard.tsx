@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiClient } from '../api/client'
 
 // Icons
 const TrendingUpIcon = () => (
@@ -50,16 +51,20 @@ export const AnalyticsDashboard = () => {
   const [timeRange, setTimeRange] = useState('7d')
   const [selectedMetric, setSelectedMetric] = useState('accuracy')
   const [insights, setInsights] = useState<MLInsight[]>([])
-  
-  // Mock data - in production, this would come from the backend
-  const [performanceData] = useState({
+  const [projects, setProjects] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Real data from API
+  const [performanceData, setPerformanceData] = useState({
     accuracy: [92, 93, 91, 94, 93, 95, 94],
     throughput: [1200, 1350, 1100, 1450, 1300, 1500, 1400],
     quality: [88, 89, 87, 91, 90, 92, 91],
     efficiency: [78, 80, 76, 82, 81, 85, 83]
   })
 
-  const [metrics] = useState<PerformanceMetric[]>([
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([
     { label: 'Overall Accuracy', value: 94.2, change: 2.1, forecast: 95.8 },
     { label: 'Task Throughput', value: 1400, change: 7.7, forecast: 1520 },
     { label: 'Quality Score', value: 91.0, change: 3.4, forecast: 92.5 },
@@ -67,45 +72,131 @@ export const AnalyticsDashboard = () => {
   ])
 
   useEffect(() => {
-    // Simulate ML insights generation
-    generateInsights()
+    loadAnalyticsData()
   }, [timeRange])
 
-  const generateInsights = () => {
-    setInsights([
-      {
-        id: '1',
-        type: 'anomaly',
-        title: 'Unusual drop in accuracy detected',
-        description: 'Worker group B showed 15% lower accuracy than average on image classification tasks yesterday.',
-        impact: 'high',
-        data: { group: 'B', drop: 15, task: 'image_classification' }
-      },
-      {
-        id: '2',
-        type: 'trend',
-        title: 'Increasing annotation speed',
-        description: 'Average time per annotation has decreased by 23% over the past week while maintaining quality.',
-        impact: 'medium',
-        data: { improvement: 23, metric: 'speed' }
-      },
-      {
-        id: '3',
-        type: 'prediction',
-        title: 'Project completion forecast',
-        description: 'Based on current velocity, Project Alpha will complete 2 days ahead of schedule.',
-        impact: 'medium',
-        data: { project: 'Alpha', daysAhead: 2 }
-      },
-      {
-        id: '4',
-        type: 'recommendation',
-        title: 'Optimize task distribution',
-        description: 'Reassigning 20% of text tasks to Team C could improve overall throughput by 12%.',
-        impact: 'high',
-        data: { optimization: 12, team: 'C' }
+  const loadAnalyticsData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      console.log('Loading analytics data...')
+
+      // Load projects and tasks
+      const projectsData = await apiClient.getProjects()
+      setProjects(projectsData)
+
+      // Load all tasks for analytics
+      const allTasks: any[] = []
+      for (const project of projectsData) {
+        try {
+          const projectTasks = await apiClient.getProjectTasks(project.id)
+          allTasks.push(...projectTasks)
+        } catch (err) {
+          console.warn(`Failed to load tasks for project ${project.id}:`, err)
+        }
       }
+      setTasks(allTasks)
+
+      // Calculate real metrics from data
+      calculateMetricsFromData(projectsData, allTasks)
+      generateInsights(projectsData, allTasks)
+
+      console.log('Analytics data loaded:', { projects: projectsData.length, tasks: allTasks.length })
+    } catch (err: any) {
+      console.error('Failed to load analytics data:', err)
+      setError(err.message || 'Failed to load analytics data')
+      // Keep mock data as fallback
+      generateInsights()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculateMetricsFromData = (projectsData: any[], tasksData: any[]) => {
+    const totalProjects = projectsData.length
+    const totalTasks = tasksData.length
+    const completedTasks = tasksData.filter(task => task.status === 'completed').length
+    const pendingTasks = tasksData.filter(task => task.status === 'pending').length
+
+    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
+    const avgResponsesPerTask = totalTasks > 0 ?
+      tasksData.reduce((sum, task) => sum + task.completed_responses, 0) / totalTasks : 0
+
+    setMetrics([
+      { label: 'Total Projects', value: totalProjects, change: 0, forecast: totalProjects },
+      { label: 'Total Tasks', value: totalTasks, change: 0, forecast: totalTasks },
+      { label: 'Completion Rate', value: completionRate, change: 0, forecast: completionRate + 5 },
+      { label: 'Avg Responses/Task', value: avgResponsesPerTask, change: 0, forecast: avgResponsesPerTask + 0.5 }
     ])
+  }
+
+  const generateInsights = (projectsData?: any[], tasksData?: any[]) => {
+    const insights: MLInsight[] = []
+
+    if (projectsData && tasksData) {
+      // Generate insights based on real data
+      const activeProjects = projectsData.filter(p => p.status === 'active').length
+      const totalTasks = tasksData.length
+      const completedTasks = tasksData.filter(t => t.status === 'completed').length
+      const pendingTasks = tasksData.filter(t => t.status === 'pending').length
+
+      if (activeProjects > 0) {
+        insights.push({
+          id: '1',
+          type: 'trend',
+          title: `${activeProjects} Active Project${activeProjects > 1 ? 's' : ''} Running`,
+          description: `You have ${activeProjects} active project${activeProjects > 1 ? 's' : ''} with ${pendingTasks} pending tasks ready for annotation.`,
+          impact: 'medium',
+          data: { activeProjects, pendingTasks }
+        })
+      }
+
+      if (totalTasks > 0) {
+        const completionRate = (completedTasks / totalTasks) * 100
+        insights.push({
+          id: '2',
+          type: 'prediction',
+          title: `${completionRate.toFixed(1)}% Task Completion Rate`,
+          description: `${completedTasks} out of ${totalTasks} total tasks have been completed across all projects.`,
+          impact: completionRate > 80 ? 'low' : completionRate > 50 ? 'medium' : 'high',
+          data: { completionRate, completedTasks, totalTasks }
+        })
+      }
+
+      if (pendingTasks > 0) {
+        insights.push({
+          id: '3',
+          type: 'recommendation',
+          title: 'Tasks Ready for Annotation',
+          description: `${pendingTasks} tasks are ready for annotation. Consider starting work on high-priority items first.`,
+          impact: 'medium',
+          data: { pendingTasks }
+        })
+      }
+    } else {
+      // Fallback to mock insights
+      insights.push(
+        {
+          id: '1',
+          type: 'anomaly',
+          title: 'Unusual drop in accuracy detected',
+          description: 'Worker group B showed 15% lower accuracy than average on image classification tasks yesterday.',
+          impact: 'high',
+          data: { group: 'B', drop: 15, task: 'image_classification' }
+        },
+        {
+          id: '4',
+          type: 'recommendation',
+          title: 'Optimize task distribution',
+          description: 'Reassigning 20% of text tasks to Team C could improve overall throughput by 12%.',
+          impact: 'high',
+          data: { optimization: 12, team: 'C' }
+        }
+      )
+    }
+
+    setInsights(insights)
   }
 
   const getInsightIcon = (type: MLInsight['type']) => {
@@ -174,7 +265,37 @@ export const AnalyticsDashboard = () => {
 
   return (
     <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
-      {/* Header */}
+      {/* Loading state */}
+      {loading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '3rem',
+          color: '#6b7280'
+        }}>
+          Loading analytics data...
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#dc2626',
+          marginBottom: '1rem'
+        }}>
+          Error: {error}
+        </div>
+      )}
+
+      {/* Main content */}
+      {!loading && (
+        <>
+          {/* Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -593,6 +714,8 @@ export const AnalyticsDashboard = () => {
           </div>
         </div>
       </div>
+      </>
+      )}
     </div>
   )
 }

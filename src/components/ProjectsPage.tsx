@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AnnotationInterface, QuestionType } from './AnnotationInterface'
+import { apiClient } from '../api/client'
 
 // Icons
 const PlusIcon = () => (
@@ -18,11 +19,14 @@ interface Project {
   id: string
   name: string
   description: string
-  status: 'active' | 'completed' | 'draft'
-  tasksTotal: number
-  tasksCompleted: number
-  questionTypes: QuestionType[]
-  createdAt: string
+  status: 'active' | 'completed' | 'draft' | 'paused' | 'cancelled' | 'archived'
+  total_tasks: number
+  completed_tasks: number
+  project_type: string
+  created_at: string
+  instructions: string
+  organization_id: string
+  creator_id: string
 }
 
 export const ProjectsPage = () => {
@@ -30,52 +34,44 @@ export const ProjectsPage = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showAnnotation, setShowAnnotation] = useState(false)
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Mock projects data
-    setProjects([
-      {
-        id: '1',
-        name: 'Image Classification - Product Categories',
-        description: 'Classify e-commerce product images into categories',
-        status: 'active',
-        tasksTotal: 1000,
-        tasksCompleted: 234,
-        questionTypes: ['image_classification'],
-        createdAt: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'Customer Support Sentiment Analysis',
-        description: 'Analyze sentiment in customer support tickets',
-        status: 'active',
-        tasksTotal: 500,
-        tasksCompleted: 123,
-        questionTypes: ['sentiment_analysis', 'text_classification'],
-        createdAt: '2024-01-20'
-      },
-      {
-        id: '3',
-        name: 'Medical Entity Recognition',
-        description: 'Identify medical entities in clinical notes',
-        status: 'draft',
-        tasksTotal: 2000,
-        tasksCompleted: 0,
-        questionTypes: ['named_entity_recognition'],
-        createdAt: '2024-01-22'
-      },
-      {
-        id: '4',
-        name: 'Content Moderation',
-        description: 'Review and classify user-generated content',
-        status: 'completed',
-        tasksTotal: 5000,
-        tasksCompleted: 5000,
-        questionTypes: ['text_classification', 'multiple_choice'],
-        createdAt: '2023-12-01'
-      }
-    ])
+    loadProjects()
   }, [])
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      console.log('Loading projects from API...')
+      const projectsData = await apiClient.getProjects()
+      console.log('Projects loaded:', projectsData)
+      setProjects(projectsData)
+    } catch (err: any) {
+      console.error('Failed to load projects:', err)
+      setError(err.message || 'Failed to load projects')
+      // Fallback to mock data if API fails
+      setProjects([
+        {
+          id: '1',
+          name: 'Image Classification - Product Categories',
+          description: 'Classify e-commerce product images into categories',
+          status: 'active',
+          total_tasks: 1000,
+          completed_tasks: 234,
+          project_type: 'classification',
+          created_at: '2024-01-15',
+          instructions: 'Please classify the images according to the given categories.',
+          organization_id: 'org1',
+          creator_id: 'user1'
+        }
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleStartAnnotation = (project: Project) => {
     setSelectedProject(project)
@@ -222,14 +218,52 @@ export const ProjectsPage = () => {
         </button>
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '3rem',
+          color: '#6b7280'
+        }}>
+          Loading projects...
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#dc2626',
+          marginBottom: '1rem'
+        }}>
+          Error: {error}
+        </div>
+      )}
+
       {/* Projects grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-        gap: '1.5rem'
-      }}>
-        {projects.map((project) => {
-          const progressPercentage = (project.tasksCompleted / project.tasksTotal) * 100
+      {!loading && !error && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+          gap: '1.5rem'
+        }}>
+          {projects.length === 0 ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: '3rem',
+              color: '#6b7280'
+            }}>
+              No projects found. Create your first project to get started!
+            </div>
+          ) : (
+            projects.map((project) => {
+          const progressPercentage = project.total_tasks > 0 ? (project.completed_tasks / project.total_tasks) * 100 : 0
           const getStatusColor = (status: string) => {
             switch (status) {
               case 'active': return { bg: '#ecfdf5', text: '#059669' }
@@ -303,7 +337,7 @@ export const ProjectsPage = () => {
                 }}>
                   <span style={{ color: '#6b7280' }}>Progress</span>
                   <span style={{ color: '#111827', fontWeight: '500' }}>
-                    {project.tasksCompleted} / {project.tasksTotal}
+                    {project.completed_tasks} / {project.total_tasks}
                   </span>
                 </div>
                 <div style={{
@@ -330,21 +364,19 @@ export const ProjectsPage = () => {
                   margin: '0 0 0.5rem 0',
                   fontWeight: '500'
                 }}>
-                  Question types:
+                  Project type:
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {project.questionTypes.map((type) => (
-                    <span key={type} style={{
-                      padding: '0.25rem 0.5rem',
-                      fontSize: '0.75rem',
-                      backgroundColor: '#f3e8ff',
-                      color: '#7c3aed',
-                      borderRadius: '4px',
-                      fontWeight: '500'
-                    }}>
-                      {type.replace(/_/g, ' ')}
-                    </span>
-                  ))}
+                  <span style={{
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    backgroundColor: '#f3e8ff',
+                    color: '#7c3aed',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                  }}>
+                    {project.project_type.replace(/_/g, ' ')}
+                  </span>
                 </div>
               </div>
 
@@ -390,8 +422,9 @@ export const ProjectsPage = () => {
               </div>
             </div>
           )
-        })}
-      </div>
+        }))}
+        </div>
+      )}
 
       {/* New Project Modal */}
       {showNewProjectModal && (

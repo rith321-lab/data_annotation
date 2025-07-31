@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, UUID4
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
@@ -23,8 +23,8 @@ class UserUpdate(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: UUID4
-    organization_id: Optional[UUID4] = None
+    id: str
+    organization_id: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     last_login: Optional[datetime] = None

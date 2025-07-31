@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Index
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 from app.db.base_class import Base
@@ -9,14 +8,14 @@ from app.db.base_class import Base
 class Response(Base):
     __tablename__ = "responses"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Task relationship
-    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.id"), nullable=False)
+    task_id = Column(String, ForeignKey("tasks.id"), nullable=False)
     task = relationship("Task", back_populates="responses")
     
     # Worker relationship
-    worker_id = Column(UUID(as_uuid=True), ForeignKey("workers.id"), nullable=False)
+    worker_id = Column(String, ForeignKey("workers.id"), nullable=False)
     worker = relationship("Worker", back_populates="responses")
     
     # Response metadata
@@ -53,14 +52,14 @@ class Response(Base):
 class ResponseValue(Base):
     __tablename__ = "response_values"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Response relationship
-    response_id = Column(UUID(as_uuid=True), ForeignKey("responses.id"), nullable=False)
+    response_id = Column(String, ForeignKey("responses.id"), nullable=False)
     response = relationship("Response", back_populates="response_values")
     
     # Question relationship
-    question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False)
+    question_id = Column(String, ForeignKey("questions.id"), nullable=False)
     question = relationship("Question", back_populates="response_values")
     
     # The actual answer value

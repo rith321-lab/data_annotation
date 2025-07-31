@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6d28d9;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>Verita AI Backend Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Backend Status Check</h2>
+        <button onclick="testBackendStatus()">Test Backend Status</button>
+        <div id="status-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Authentication Test</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. User Profile Test</h2>
+        <button onclick="testUserProfile()">Test Get User Profile</button>
+        <div id="profile-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Frontend Connection Test</h2>
+        <button onclick="testFrontend()">Test Frontend</button>
+        <div id="frontend-result" class="result"></div>
+    </div>
+
+    <script>
+        let accessToken = null;
+
+        async function testBackendStatus() {
+            const resultDiv = document.getElementById('status-result');
+            try {
+                const response = await fetch('http://localhost:8000/');
+                const data = await response.json();
+                resultDiv.textContent = `✅ Backend Status: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `❌ Backend Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-result');
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', 'admin@verita.ai');
+                formData.append('password', 'admin123');
+
+                const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    accessToken = data.access_token;
+                    resultDiv.textContent = `✅ Login Success: ${response.status}\nToken: ${data.access_token.substring(0, 50)}...`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = `❌ Login Failed: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Login Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testUserProfile() {
+            const resultDiv = document.getElementById('profile-result');
+            if (!accessToken) {
+                resultDiv.textContent = '❌ Please login first to get access token';
+                resultDiv.className = 'result error';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    resultDiv.textContent = `✅ User Profile: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = `❌ Profile Failed: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Profile Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testFrontend() {
+            const resultDiv = document.getElementById('frontend-result');
+            try {
+                const response = await fetch('http://localhost:3001/');
+                if (response.ok) {
+                    resultDiv.textContent = `✅ Frontend Status: ${response.status}\nFrontend is accessible`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = `❌ Frontend Status: ${response.status}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Frontend Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // Auto-run status check on page load
+        window.onload = function() {
+            testBackendStatus();
+        };
+    </script>
+</body>
+</html>

@@ -108,11 +108,17 @@ const HistoryIcon = () => (
 )
 
 export default function App() {
-  const [view, setView] = useState<'home' | 'login' | 'dashboard'>('home')
+  const [view, setView] = useState<'home' | 'login' | 'dashboard'>('login')
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [activeNav, setActiveNav] = useState('Projects')
   const [currentPage, setCurrentPage] = useState('dashboard')
+
+  // State for old login form (still referenced in the code)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   // Check if user is already logged in
   useEffect(() => {
@@ -121,68 +127,9 @@ export default function App() {
     }
   }, [])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setMessage('')
-    
-    try {
-      const formData = new URLSearchParams()
-      formData.append('username', email)
-      formData.append('password', password)
-      
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem('access_token', data.access_token)
-        localStorage.setItem('refresh_token', data.refresh_token)
-        setMessage('Login successful!')
-        setTimeout(() => setView('dashboard'), 1000)
-      } else {
-        setMessage('Login failed. Please check your credentials.')
-      }
-    } catch (error) {
-      setMessage('Error connecting to server. Make sure the backend is running on http://localhost:8000')
-    }
-    setIsLoading(false)
-  }
 
-  const handleRegister = async () => {
-    setIsLoading(true)
-    setMessage('')
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: email,
-          email: email,
-          password: password,
-          full_name: 'Test User'
-        })
-      })
-      
-      if (response.ok) {
-        setMessage('Registration successful! You can now login.')
-      } else {
-        const errorData = await response.json()
-        setMessage(`Registration failed: ${errorData.detail || 'Unknown error'}`)
-      }
-    } catch (error) {
-      setMessage('Error connecting to server. Make sure the backend is running on http://localhost:8000')
-    }
-    setIsLoading(false)
-  }
+
+
 
   if (view === 'dashboard') {
     const navItems = [

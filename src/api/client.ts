@@ -69,16 +69,16 @@ class ApiClient {
 
   // Auth endpoints
   async login(email: string, password: string) {
-    const formData = new FormData();
+    const formData = new URLSearchParams();
     formData.append('username', email); // OAuth2 uses username field
     formData.append('password', password);
-    
-    const response = await this.client.post('/api/v1/auth/login', formData, {
+
+    const response = await this.client.post('/api/v1/auth/login', formData.toString(), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
-    
+
     this.setTokens(response.data.access_token, response.data.refresh_token);
     return response.data;
   }
@@ -131,6 +131,12 @@ class ApiClient {
 
   async deleteProject(projectId: string) {
     const response = await this.client.delete(`/api/v1/projects/${projectId}`);
+    return response.data;
+  }
+
+  // Task endpoints
+  async getProjectTasks(projectId: string, params?: { skip?: number; limit?: number; status?: string }) {
+    const response = await this.client.get(`/api/v1/projects/${projectId}/tasks`, { params });
     return response.data;
   }
 

@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Text, Boolean, Integer, ForeignKey, Enum, JSON
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -25,10 +24,10 @@ class QuestionType(str, enum.Enum):
 class Question(Base):
     __tablename__ = "questions"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Project relationship
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
     project = relationship("Project", back_populates="questions")
     
     # Question details

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiClient } from '../api/client'
 
 // Icons
 const UserPlusIcon = () => (
@@ -39,15 +40,19 @@ const MoreVerticalIcon = () => (
 
 interface TeamMember {
   id: string
-  name: string
   email: string
-  role: 'admin' | 'manager' | 'labeler' | 'reviewer'
+  username: string
+  full_name: string
+  is_active: boolean
+  is_superuser: boolean
+  created_at: string
+  last_login?: string
+  organization_id: string
+  // Computed fields for display
+  role?: 'admin' | 'manager' | 'labeler' | 'reviewer'
   avatar?: string
-  joinedAt: string
-  lastActive: string
-  tasksCompleted: number
-  accuracy: number
-  status: 'active' | 'inactive' | 'invited'
+  tasksCompleted?: number
+  accuracy?: number
 }
 
 export const TeamPage = () => {
@@ -55,78 +60,65 @@ export const TeamPage = () => {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string>('')
   const [inviteEmail, setInviteEmail] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Mock team data
-    setTeamMembers([
-      {
-        id: '1',
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        role: 'admin',
-        joinedAt: '2024-01-01',
-        lastActive: '2 hours ago',
-        tasksCompleted: 1523,
-        accuracy: 98.5,
-        status: 'active'
-      },
-      {
-        id: '2',
-        name: 'Sarah Johnson',
-        email: 'sarah.j@example.com',
-        role: 'manager',
-        joinedAt: '2024-01-15',
-        lastActive: '5 minutes ago',
-        tasksCompleted: 892,
-        accuracy: 97.2,
-        status: 'active'
-      },
-      {
-        id: '3',
-        name: 'Mike Chen',
-        email: 'mike.chen@example.com',
-        role: 'labeler',
-        joinedAt: '2024-02-01',
-        lastActive: '1 day ago',
-        tasksCompleted: 456,
-        accuracy: 95.8,
-        status: 'active'
-      },
-      {
-        id: '4',
-        name: 'Emily Davis',
-        email: 'emily.d@example.com',
-        role: 'reviewer',
-        joinedAt: '2024-02-10',
-        lastActive: '3 hours ago',
-        tasksCompleted: 678,
-        accuracy: 99.1,
-        status: 'active'
-      },
-      {
-        id: '5',
-        name: 'Alex Thompson',
-        email: 'alex.t@example.com',
-        role: 'labeler',
-        joinedAt: '2024-02-20',
-        lastActive: 'Offline',
-        tasksCompleted: 234,
-        accuracy: 94.3,
-        status: 'inactive'
-      },
-      {
-        id: '6',
-        name: 'Lisa Wang',
-        email: 'lisa.wang@example.com',
-        role: 'labeler',
-        joinedAt: '-',
-        lastActive: 'Not yet joined',
-        tasksCompleted: 0,
-        accuracy: 0,
-        status: 'invited'
-      }
-    ])
+    loadTeamMembers()
   }, [])
+
+  const loadTeamMembers = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      console.log('Loading team members...')
+
+      // For now, we'll show the current user as the team
+      // In a full implementation, you'd have a users endpoint
+      const currentUser = await apiClient.getCurrentUser()
+
+      // Transform user data to team member format
+      const teamMember: TeamMember = {
+        id: currentUser.id,
+        email: currentUser.email,
+        username: currentUser.username,
+        full_name: currentUser.full_name || currentUser.username,
+        is_active: currentUser.is_active,
+        is_superuser: currentUser.is_superuser,
+        created_at: currentUser.created_at,
+        last_login: currentUser.last_login,
+        organization_id: currentUser.organization_id,
+        role: currentUser.is_superuser ? 'admin' : 'labeler',
+        tasksCompleted: 0, // Would come from task statistics
+        accuracy: 95.0 // Would come from performance metrics
+      }
+
+      setTeamMembers([teamMember])
+      console.log('Team members loaded:', [teamMember])
+    } catch (err: any) {
+      console.error('Failed to load team members:', err)
+      setError(err.message || 'Failed to load team members')
+      // Fallback to mock data
+      setTeamMembers([
+        {
+          id: '1',
+          email: 'admin@verita.ai',
+          username: 'admin',
+          full_name: 'Admin User',
+          is_active: true,
+          is_superuser: true,
+          created_at: '2024-01-01T00:00:00Z',
+          organization_id: 'org1',
+          role: 'admin',
+          tasksCompleted: 0,
+          accuracy: 95.0
+        }
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -169,7 +161,37 @@ export const TeamPage = () => {
 
   return (
     <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
-      {/* Header */}
+      {/* Loading state */}
+      {loading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '3rem',
+          color: '#6b7280'
+        }}>
+          Loading team members...
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#dc2626',
+          marginBottom: '1rem'
+        }}>
+          Error: {error}
+        </div>
+      )}
+
+      {/* Main content */}
+      {!loading && (
+        <>
+          {/* Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -440,7 +462,7 @@ export const TeamPage = () => {
             <tbody style={{ backgroundColor: 'white' }}>
               {teamMembers.map((member, index) => {
                 const roleColor = getRoleBadgeColor(member.role)
-                const statusInfo = getStatusInfo(member.status)
+                const statusInfo = getStatusInfo(member.is_active ? 'active' : 'inactive')
 
                 return (
                   <tr
@@ -471,7 +493,7 @@ export const TeamPage = () => {
                             fontSize: '0.875rem',
                             fontWeight: '500'
                           }}>
-                            {member.name.split(' ').map(n => n[0]).join('')}
+                            {member.full_name.split(' ').map(n => n[0]).join('')}
                           </div>
                         </div>
                         <div style={{ marginLeft: '1rem' }}>
@@ -480,7 +502,7 @@ export const TeamPage = () => {
                             fontWeight: '500',
                             color: '#111827'
                           }}>
-                            {member.name}
+                            {member.full_name}
                           </div>
                           <div style={{
                             fontSize: '0.875rem',
@@ -707,6 +729,8 @@ export const TeamPage = () => {
             </form>
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   )

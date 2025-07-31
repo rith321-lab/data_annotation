@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiClient } from '../api/client'
 
 // Icons
 const ListIcon = () => (
@@ -48,19 +49,25 @@ const PauseIcon = () => (
 
 interface Task {
   id: string
-  projectId: string
-  projectName: string
-  title: string
-  type: string
-  priority: 'urgent' | 'high' | 'medium' | 'low'
-  deadline?: string
-  estimatedTime: number // in minutes
-  assignedTo?: string
-  status: 'pending' | 'in_progress' | 'paused' | 'completed'
-  tags: string[]
-  reward: number
-  completedCount: number
-  totalCount: number
+  project_id: string
+  external_id?: string
+  data: {
+    image_url?: string
+    question?: string
+    options?: string[]
+    [key: string]: any
+  }
+  task_metadata: {
+    name?: string
+    [key: string]: any
+  }
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'pending' | 'in_progress' | 'paused' | 'completed' | 'cancelled'
+  is_gold_standard: boolean
+  required_responses: number
+  completed_responses: number
+  created_at: string
+  updated_at?: string
 }
 
 interface TaskFilter {
@@ -71,67 +78,67 @@ interface TaskFilter {
 }
 
 export const TaskQueue = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      projectId: '1',
-      projectName: 'Image Classification',
-      title: 'Classify product images - Batch A23',
-      type: 'image_classification',
-      priority: 'urgent',
-      deadline: '2024-01-26T18:00:00',
-      estimatedTime: 45,
-      assignedTo: 'current_user',
-      status: 'in_progress',
-      tags: ['quality_check', 'client_priority'],
-      reward: 0.05,
-      completedCount: 234,
-      totalCount: 500
-    },
-    {
-      id: '2',
-      projectId: '2',
-      projectName: 'Sentiment Analysis',
-      title: 'Analyze customer reviews - Q1 2024',
-      type: 'text_classification',
-      priority: 'high',
-      deadline: '2024-01-27T12:00:00',
-      estimatedTime: 60,
-      status: 'pending',
-      tags: ['nlp', 'customer_feedback'],
-      reward: 0.03,
-      completedCount: 0,
-      totalCount: 1000
-    },
-    {
-      id: '3',
-      projectId: '3',
-      projectName: 'Medical NER',
-      title: 'Extract medical entities from clinical notes',
-      type: 'named_entity_recognition',
-      priority: 'medium',
-      estimatedTime: 90,
-      status: 'pending',
-      tags: ['medical', 'specialized'],
-      reward: 0.08,
-      completedCount: 0,
-      totalCount: 200
-    },
-    {
-      id: '4',
-      projectId: '1',
-      projectName: 'Image Classification',
-      title: 'Quality review - Previous annotations',
-      type: 'quality_review',
-      priority: 'low',
-      estimatedTime: 30,
-      status: 'pending',
-      tags: ['review', 'quality_assurance'],
-      reward: 0.04,
-      completedCount: 0,
-      totalCount: 100
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [projects, setProjects] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadTasksAndProjects()
+  }, [])
+
+  const loadTasksAndProjects = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Load projects first
+      console.log('Loading projects and tasks...')
+      const projectsData = await apiClient.getProjects()
+      setProjects(projectsData)
+
+      // Load tasks for all projects
+      const allTasks: Task[] = []
+      for (const project of projectsData) {
+        try {
+          const projectTasks = await apiClient.getProjectTasks(project.id)
+          allTasks.push(...projectTasks)
+        } catch (err) {
+          console.warn(`Failed to load tasks for project ${project.id}:`, err)
+        }
+      }
+
+      console.log('Loaded tasks:', allTasks)
+      setTasks(allTasks)
+    } catch (err: any) {
+      console.error('Failed to load tasks:', err)
+      setError(err.message || 'Failed to load tasks')
+      // Fallback to mock data
+      setTasks([
+        {
+          id: '1',
+          project_id: '1',
+          external_id: null,
+          data: {
+            image_url: 'https://example.com/cat.jpg',
+            question: 'What animal is in this image?',
+            options: ['Cat', 'Dog', 'Bird', 'Other']
+          },
+          task_metadata: {
+            name: 'Classify Cat Image'
+          },
+          priority: 'medium',
+          status: 'pending',
+          is_gold_standard: false,
+          required_responses: 3,
+          completed_responses: 0,
+          created_at: '2024-01-15T10:00:00Z'
+        }
+      ])
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
 
   const [filter, setFilter] = useState<TaskFilter>({})
   const [sortBy, setSortBy] = useState<'priority' | 'deadline' | 'reward'>('priority')
@@ -527,9 +534,46 @@ export const TaskQueue = () => {
         </div>
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '3rem',
+          color: '#6b7280'
+        }}>
+          Loading tasks...
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#dc2626',
+          marginBottom: '1rem'
+        }}>
+          Error: {error}
+        </div>
+      )}
+
       {/* Task List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {sortedTasks.map((task) => {
+      {!loading && !error && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {sortedTasks.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem',
+              color: '#6b7280'
+            }}>
+              No tasks found. Tasks will appear here when projects have annotation work available.
+            </div>
+          ) : (
+            sortedTasks.map((task) => {
           const priorityColor = getPriorityColor(task.priority)
 
           return (
@@ -562,7 +606,7 @@ export const TaskQueue = () => {
                       color: '#111827',
                       margin: 0
                     }}>
-                      {task.title}
+                      {task.task_metadata?.name || `Task ${task.id.slice(0, 8)}`}
                     </h3>
                     <span style={{
                       padding: '0.25rem 0.5rem',
@@ -602,33 +646,36 @@ export const TaskQueue = () => {
                     color: '#6b7280',
                     marginBottom: '1rem'
                   }}>
-                    <span>{task.projectName}</span>
+                    <span>Project: {task.project_id.slice(0, 8)}...</span>
                     <span>•</span>
-                    <span>{task.type.replace(/_/g, ' ')}</span>
+                    <span>{task.data.question ? 'Question' : 'Data Task'}</span>
                     <span>•</span>
-                    <span>~{task.estimatedTime} min</span>
-                    <span>•</span>
-                    <span style={{ color: '#059669', fontWeight: '500' }}>
-                      ${task.reward}/item
-                    </span>
+                    <span>Responses: {task.completed_responses}/{task.required_responses}</span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {task.tags.map((tag) => (
-                      <span key={tag} style={{
-                        padding: '0.25rem 0.5rem',
-                        fontSize: '0.75rem',
-                        backgroundColor: '#f3f4f6',
-                        color: '#374151',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
-                      }}>
-                        <TagIcon />
-                        {tag}
-                      </span>
-                    ))}
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      backgroundColor: '#f3f4f6',
+                      color: '#374151',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}>
+                      <TagIcon />
+                      {task.is_gold_standard ? 'Gold Standard' : 'Regular Task'}
+                    </span>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      backgroundColor: '#f3f4f6',
+                      color: '#374151',
+                      borderRadius: '4px'
+                    }}>
+                      Priority: {task.priority}
+                    </span>
                   </div>
                 </div>
 
@@ -640,14 +687,14 @@ export const TaskQueue = () => {
                       color: '#111827',
                       margin: '0 0 0.25rem 0'
                     }}>
-                      {task.completedCount} / {task.totalCount}
+                      {task.completed_responses} / {task.required_responses}
                     </p>
                     <p style={{
                       fontSize: '0.75rem',
                       color: '#6b7280',
                       margin: 0
                     }}>
-                      items
+                      responses
                     </p>
                   </div>
 
@@ -748,44 +795,11 @@ export const TaskQueue = () => {
               )}
             </div>
           )
-        })}
-      </div>
-
-      {/* Empty State */}
-      {sortedTasks.length === 0 && (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          padding: '3rem',
-          textAlign: 'center'
-        }}>
-          <div style={{ color: '#9ca3af', marginBottom: '1rem' }}>
-            <ListIcon />
-          </div>
-          <p style={{
-            fontSize: '1rem',
-            color: '#6b7280',
-            margin: '0 0 1rem 0'
-          }}>
-            No tasks match your current filters
-          </p>
-          <button
-            onClick={() => setFilter({})}
-            style={{
-              fontSize: '0.875rem',
-              color: '#7c3aed',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
-            Clear filters
-          </button>
+        }))}
         </div>
       )}
+
+
     </div>
   )
 }

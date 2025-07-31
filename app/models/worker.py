@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, Float, ForeignKey, Enum, JSON, Index
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -23,10 +22,10 @@ class WorkerType(str, enum.Enum):
 class Worker(Base):
     __tablename__ = "workers"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # User relationship (optional - for internal workers)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True)
+    user_id = Column(String, ForeignKey("users.id"), unique=True)
     user = relationship("User", back_populates="worker_profile")
     
     # Worker details
@@ -85,13 +84,13 @@ class Worker(Base):
 class WorkerAssignment(Base):
     __tablename__ = "worker_assignments"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Worker and Task
-    worker_id = Column(UUID(as_uuid=True), ForeignKey("workers.id"), nullable=False)
+    worker_id = Column(String, ForeignKey("workers.id"), nullable=False)
     worker = relationship("Worker", back_populates="assignments")
     
-    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.id"), nullable=False)
+    task_id = Column(String, ForeignKey("tasks.id"), nullable=False)
     task = relationship("Task", back_populates="worker_assignments")
     
     # Assignment details

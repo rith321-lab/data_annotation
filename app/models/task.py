@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, Float, ForeignKey, Enum, JSON, Index
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 import enum
 
@@ -26,11 +25,11 @@ class TaskPriority(str, enum.Enum):
 class Task(Base):
     __tablename__ = "tasks"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     external_id = Column(String, unique=True, index=True)  # Customer-provided ID
-    
+
     # Project relationship
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
     project = relationship("Project", back_populates="tasks")
     
     # Task data

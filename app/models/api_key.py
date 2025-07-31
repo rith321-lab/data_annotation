@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 from app.db.base_class import Base
@@ -9,10 +8,10 @@ from app.db.base_class import Base
 class APIKey(Base):
     __tablename__ = "api_keys"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # User relationship
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="api_keys")
     
     # Key details
