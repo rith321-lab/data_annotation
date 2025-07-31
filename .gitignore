@@ -64,3 +64,6 @@ debug_agents/reports/
 # Dependencies
 package-lock.json
 yarn.lock
+BACKEND_GUIDE.md
+CLAUDE.md
+DEMO_READY.md

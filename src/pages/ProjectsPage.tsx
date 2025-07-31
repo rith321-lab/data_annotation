@@ -115,9 +115,9 @@ export function ProjectsPage() {
                 onClick={() => navigate(`/projects/${project.id}`)}
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg leading-tight">{project.name}</CardTitle>
                       <Badge 
                         className={`${getStatusColor(project.status)} text-white mt-2`}
                       >
@@ -183,19 +183,19 @@ export function ProjectsPage() {
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">{completionRate.toFixed(0)}%</span>
+                        <span className="font-medium text-right">{completionRate.toFixed(0)}%</span>
                       </div>
                       <Progress value={completionRate} className="h-2" />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
+                      <div className="flex items-center justify-between">
                         <span className="text-gray-600">Tasks:</span>
-                        <span className="ml-2 font-medium">{project.total_tasks}</span>
+                        <span className="font-medium">{project.total_tasks}</span>
                       </div>
-                      <div>
+                      <div className="flex items-center justify-between">
                         <span className="text-gray-600">Completed:</span>
-                        <span className="ml-2 font-medium">{project.completed_tasks}</span>
+                        <span className="font-medium">{project.completed_tasks}</span>
                       </div>
                     </div>
                     

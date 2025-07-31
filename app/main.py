@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
-import sentry_sdk
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 from app.core.config import settings
 from app.api.v1.api import api_router
@@ -11,39 +12,28 @@ from app.db.session import engine
 from app.db import base
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc"
+    title="Verita AI",
+    version="1.0.0",
+    openapi_url=f"/api/v1/openapi.json",
+    docs_url=f"/api/v1/docs",
+    redoc_url=f"/api/v1/redoc"
 )
 
-# Sentry initialization
-if settings.SENTRY_DSN and settings.SENTRY_DSN != "your-sentry-dsn":
-    sentry_sdk.init(dsn=settings.SENTRY_DSN, traces_sample_rate=0.1)
-    app.add_middleware(SentryAsgiMiddleware)
-
-# CORS middleware
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-# Trusted host middleware
+# CORS middleware - allow frontend origins
 app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=["*.verita.ai", "localhost", "127.0.0.1"]
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:3001", 
+        "http://localhost:3002"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-# Prometheus metrics
-Instrumentator().instrument(app).expose(app)
 
 # Include API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
@@ -57,8 +47,8 @@ async def startup_event():
 async def root():
     return {
         "message": "Welcome to Verita AI API",
-        "version": settings.VERSION,
-        "docs": f"{settings.API_V1_STR}/docs"
+        "version": "1.0.0",
+        "docs": "/api/v1/docs"
     }
 
 

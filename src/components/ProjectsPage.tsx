@@ -1,19 +1,31 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AnnotationInterface, QuestionType } from './AnnotationInterface'
 import { apiClient } from '../api/client'
-
-// Icons
-const PlusIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-)
-
-const PlayIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polygon points="5 3 19 12 5 21 5 3"/>
-  </svg>
-)
+import { Button } from './ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Badge } from './ui/badge'
+import { Progress } from './ui/progress'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Textarea } from './ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
+import { cn } from './ui/utils'
+import {
+  Plus,
+  Play,
+  Pause,
+  Calendar,
+  Target,
+  Activity,
+  ArrowLeft,
+  TrendingUp,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  FolderPlus,
+  Search
+} from 'lucide-react'
 
 interface Project {
   id: string
@@ -29,6 +41,12 @@ interface Project {
   creator_id: string
 }
 
+interface NewProjectForm {
+  name: string
+  description: string
+  questionType: string
+}
+
 export const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
@@ -36,6 +54,13 @@ export const ProjectsPage = () => {
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [newProjectForm, setNewProjectForm] = useState<NewProjectForm>({
+    name: '',
+    description: '',
+    questionType: 'text_classification'
+  })
+  const [creating, setCreating] = useState(false)
 
   useEffect(() => {
     loadProjects()
@@ -73,6 +98,64 @@ export const ProjectsPage = () => {
     }
   }
 
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreating(true)
+    
+    try {
+      // Call the API to create the project
+      const projectData = {
+        name: newProjectForm.name,
+        description: newProjectForm.description,
+        project_type: newProjectForm.questionType,
+        instructions: 'Project instructions will be added here.',
+        status: 'draft'
+      }
+      
+      console.log('Creating project with data:', projectData)
+      const newProject = await apiClient.createProject(projectData)
+      console.log('Project created successfully:', newProject)
+      
+      // Add the new project to the list
+      setProjects(prev => [newProject, ...prev])
+      setShowNewProjectModal(false)
+      setNewProjectForm({
+        name: '',
+        description: '',
+        questionType: 'text_classification'
+      })
+      setError(null) // Clear any previous errors
+    } catch (err: any) {
+      console.error('Failed to create project:', err)
+      setError(err.message || 'Failed to create project')
+      
+      // If API fails, still add locally for demo purposes
+      const localProject: Project = {
+        id: Date.now().toString(),
+        name: newProjectForm.name,
+        description: newProjectForm.description,
+        status: 'draft',
+        total_tasks: 0,
+        completed_tasks: 0,
+        project_type: newProjectForm.questionType,
+        created_at: new Date().toISOString(),
+        instructions: 'Project instructions will be added here.',
+        organization_id: 'org1',
+        creator_id: 'user1'
+      }
+      
+      setProjects(prev => [localProject, ...prev])
+      setShowNewProjectModal(false)
+      setNewProjectForm({
+        name: '',
+        description: '',
+        questionType: 'text_classification'
+      })
+    } finally {
+      setCreating(false)
+    }
+  }
+
   const handleStartAnnotation = (project: Project) => {
     setSelectedProject(project)
     setShowAnnotation(true)
@@ -86,7 +169,35 @@ export const ProjectsPage = () => {
     setSelectedProject(null)
   }
 
-  // Sample questions for demonstration
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'active':
+        return {
+          variant: 'default' as const,
+          icon: <Play className="w-3 h-3" />,
+          className: 'bg-green-500/10 text-green-700 border-green-500/20'
+        }
+      case 'completed':
+        return {
+          variant: 'secondary' as const,
+          icon: <CheckCircle2 className="w-3 h-3" />,
+          className: 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+        }
+      case 'paused':
+        return {
+          variant: 'outline' as const,
+          icon: <Pause className="w-3 h-3" />,
+          className: 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+        }
+      default:
+        return {
+          variant: 'secondary' as const,
+          icon: <AlertCircle className="w-3 h-3" />,
+          className: 'bg-gray-500/10 text-gray-700 border-gray-500/20'
+        }
+    }
+  }
+
   const getSampleQuestions = (project: Project) => {
     if (project.id === '1') {
       return [
@@ -104,59 +215,49 @@ export const ProjectsPage = () => {
           type: 'multiple_choice' as QuestionType,
           title: 'Select all visible product attributes',
           description: 'Choose all that apply',
+          data: {},
           options: ['Brand visible', 'Price tag visible', 'Multiple colors', 'In packaging', 'Used/Second-hand'],
           required: false
-        }
-      ]
-    } else if (project.id === '2') {
-      return [
-        {
-          id: 'q1',
-          type: 'text_classification' as QuestionType,
-          title: 'What is the overall sentiment of this message?',
-          description: 'Analyze the customer\'s tone and emotion',
-          data: { text: 'I\'ve been waiting for my order for 3 weeks now. This is unacceptable!' },
-          options: ['Very Positive', 'Positive', 'Neutral', 'Negative', 'Very Negative'],
-          required: true
-        },
-        {
-          id: 'q2',
-          type: 'multiple_choice' as QuestionType,
-          title: 'What issues are mentioned?',
-          description: 'Select all that apply',
-          options: ['Delivery delay', 'Product quality', 'Customer service', 'Pricing', 'Technical issue'],
-          required: true
         }
       ]
     }
     return []
   }
 
+  const filteredProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   if (showAnnotation && selectedProject) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div>
-                <h1 className="text-lg font-semibold">{selectedProject.name}</h1>
-                <p className="text-sm text-gray-500">Task annotation</p>
+      <div className="min-h-screen bg-background">
+        <div className="bg-card border-b border-border">
+          <div className="max-w-7xl mx-auto px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={() => {
+                    setShowAnnotation(false)
+                    setSelectedProject(null)
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Projects
+                </Button>
+                <div>
+                  <h1 className="text-xl font-semibold">{selectedProject.name}</h1>
+                  <p className="text-sm text-muted-foreground">Task annotation</p>
+                </div>
               </div>
-              <button
-                onClick={() => {
-                  setShowAnnotation(false)
-                  setSelectedProject(null)
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕ Close
-              </button>
             </div>
           </div>
         </div>
         <AnnotationInterface
           projectId={selectedProject.id}
-          taskId="task-123"
+          taskId="sample-task-1"
           questions={getSampleQuestions(selectedProject)}
           onSubmit={handleSubmitAnnotation}
         />
@@ -165,411 +266,327 @@ export const ProjectsPage = () => {
   }
 
   return (
-    <div style={{ padding: '2rem', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <div className="p-8 space-y-8">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
-      }}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 style={{
-            fontSize: '2rem',
-            fontWeight: '700',
-            color: '#111827',
-            margin: '0 0 0.5rem 0'
-          }}>
-            Projects
-          </h1>
-          <p style={{
-            color: '#6b7280',
-            fontSize: '1rem',
-            margin: 0
-          }}>
+          <h1 className="text-3xl font-bold">Projects</h1>
+          <p className="text-muted-foreground">
             Manage your data labeling projects and track progress
           </p>
         </div>
-        <button
-          onClick={() => setShowNewProjectModal(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#7c3aed',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s ease'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#6d28d9'
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#7c3aed'
-          }}
-        >
-          <PlusIcon />
-          New Project
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-64"
+            />
+          </div>
+          <Dialog open={showNewProjectModal} onOpenChange={setShowNewProjectModal}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                New Project
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Project</DialogTitle>
+                <DialogDescription>
+                  Set up a new data annotation project to get started.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateProject} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="projectName" className="text-foreground">Project Name</Label>
+                  <Input
+                    id="projectName"
+                    value={newProjectForm.name}
+                    onChange={(e) => setNewProjectForm(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))}
+                    placeholder="Enter project name"
+                    required
+                    className="text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="projectDescription" className="text-foreground">Description</Label>
+                  <Textarea
+                    id="projectDescription"
+                    value={newProjectForm.description}
+                    onChange={(e) => setNewProjectForm(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }))}
+                    placeholder="Describe your project"
+                    rows={3}
+                    className="text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="questionType" className="text-foreground">Question Type</Label>
+                  <Select
+                    value={newProjectForm.questionType}
+                    onValueChange={(value) => setNewProjectForm(prev => ({
+                      ...prev,
+                      questionType: value
+                    }))}
+                  >
+                    <SelectTrigger className="text-foreground">
+                      <SelectValue placeholder="Select question type" className="text-muted-foreground" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text_classification">Text Classification</SelectItem>
+                      <SelectItem value="image_classification">Image Classification</SelectItem>
+                      <SelectItem value="sentiment_analysis">Sentiment Analysis</SelectItem>
+                      <SelectItem value="named_entity_recognition">Named Entity Recognition</SelectItem>
+                      <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button type="submit" disabled={creating} className="flex-1">
+                    {creating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Project'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowNewProjectModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Loading state */}
       {loading && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '3rem',
-          color: '#6b7280'
-        }}>
-          Loading projects...
+        <div className="flex justify-center items-center py-16">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Loading projects...</span>
+          </div>
         </div>
       )}
 
       {/* Error state */}
       {error && (
-        <div style={{
-          padding: '1rem',
-          backgroundColor: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '8px',
-          color: '#dc2626',
-          marginBottom: '1rem'
-        }}>
-          Error: {error}
-        </div>
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertCircle className="w-5 h-5" />
+              <div>
+                <p className="font-medium">Failed to load projects</p>
+                <p className="text-sm text-destructive/80">{error}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Projects grid */}
-      {!loading && !error && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-          gap: '1.5rem'
-        }}>
-          {projects.length === 0 ? (
-            <div style={{
-              gridColumn: '1 / -1',
-              textAlign: 'center',
-              padding: '3rem',
-              color: '#6b7280'
-            }}>
-              No projects found. Create your first project to get started!
+      {/* Projects Grid */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.length === 0 ? (
+            <div className="col-span-full">
+              <Card className="text-center py-16">
+                <CardContent>
+                  <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FolderPlus className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <CardTitle className="text-xl mb-2">
+                    {searchTerm ? 'No projects found' : 'No projects yet'}
+                  </CardTitle>
+                  <CardDescription className="mb-6">
+                    {searchTerm 
+                      ? `No projects match "${searchTerm}". Try adjusting your search.`
+                      : 'Create your first project to get started with data labeling!'
+                    }
+                  </CardDescription>
+                  {!searchTerm && (
+                    <Button onClick={() => setShowNewProjectModal(true)} className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      Create Your First Project
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           ) : (
-            projects.map((project) => {
-          const progressPercentage = project.total_tasks > 0 ? (project.completed_tasks / project.total_tasks) * 100 : 0
-          const getStatusColor = (status: string) => {
-            switch (status) {
-              case 'active': return { bg: '#ecfdf5', text: '#059669' }
-              case 'completed': return { bg: '#eff6ff', text: '#2563eb' }
-              default: return { bg: '#f3f4f6', text: '#6b7280' }
-            }
-          }
-          const statusColor = getStatusColor(project.status)
+            filteredProjects.map((project) => {
+              const progressPercentage = project.total_tasks > 0 
+                ? (project.completed_tasks / project.total_tasks) * 100 
+                : 0
+              const statusConfig = getStatusConfig(project.status)
+              
+              return (
+                <Card key={project.id} className="group hover:shadow-lg transition-all duration-200 cursor-pointer h-full flex flex-col">
+                  <CardHeader className="pb-3 flex-grow-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors leading-tight">
+                          {project.name}
+                        </CardTitle>
+                      </div>
+                      <Badge className={cn("shrink-0 flex items-center gap-1", statusConfig.className)}>
+                        {statusConfig.icon}
+                        <span className="capitalize">{project.status}</span>
+                      </Badge>
+                    </div>
+                    <CardDescription className="line-clamp-2 mt-2">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4 flex-grow flex flex-col">
+                    {/* Progress */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground font-medium">Progress</span>
+                        <span className="font-semibold text-right">
+                          {project.completed_tasks} / {project.total_tasks}
+                        </span>
+                      </div>
+                      <Progress value={progressPercentage} className="h-2" />
+                      <div className="text-xs text-muted-foreground text-right">
+                        {Math.round(progressPercentage)}% complete
+                      </div>
+                    </div>
 
-          return (
-            <div key={project.id} style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              transition: 'box-shadow 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
-            }}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: '1rem'
-              }}>
-                <h3 style={{
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  color: '#111827',
-                  margin: 0,
-                  flex: 1,
-                  marginRight: '1rem'
-                }}>
-                  {project.name}
-                </h3>
-                <span style={{
-                  padding: '0.25rem 0.75rem',
-                  fontSize: '0.75rem',
-                  fontWeight: '500',
-                  borderRadius: '9999px',
-                  backgroundColor: statusColor.bg,
-                  color: statusColor.text,
-                  textTransform: 'capitalize'
-                }}>
-                  {project.status}
-                </span>
-              </div>
+                    {/* Project Type */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground font-medium">Project type:</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {project.project_type?.replace(/_/g, ' ') || 'classification'}
+                        </Badge>
+                      </div>
+                    </div>
 
-              <p style={{
-                color: '#6b7280',
-                fontSize: '0.875rem',
-                margin: '0 0 1.5rem 0',
-                lineHeight: '1.5'
-              }}>
-                {project.description}
-              </p>
+                    {/* Spacer to push actions to bottom */}
+                    <div className="flex-grow"></div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '0.875rem',
-                  marginBottom: '0.5rem'
-                }}>
-                  <span style={{ color: '#6b7280' }}>Progress</span>
-                  <span style={{ color: '#111827', fontWeight: '500' }}>
-                    {project.completed_tasks} / {project.total_tasks}
-                  </span>
-                </div>
-                <div style={{
-                  width: '100%',
-                  height: '8px',
-                  backgroundColor: '#e5e7eb',
-                  borderRadius: '4px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    width: `${progressPercentage}%`,
-                    height: '100%',
-                    backgroundColor: '#7c3aed',
-                    borderRadius: '4px',
-                    transition: 'width 0.3s ease'
-                  }} />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: '#6b7280',
-                  margin: '0 0 0.5rem 0',
-                  fontWeight: '500'
-                }}>
-                  Project type:
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <span style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#f3e8ff',
-                    color: '#7c3aed',
-                    borderRadius: '4px',
-                    fontWeight: '500'
-                  }}>
-                    {project.project_type.replace(/_/g, ' ')}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <span style={{
-                  fontSize: '0.75rem',
-                  color: '#6b7280'
-                }}>
-                  Created {project.createdAt}
-                </span>
-                {project.status === 'active' && (
-                  <button
-                    onClick={() => handleStartAnnotation(project)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      padding: '0.5rem 0.75rem',
-                      backgroundColor: '#7c3aed',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s ease'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = '#6d28d9'
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = '#7c3aed'
-                    }}
-                  >
-                    <PlayIcon />
-                    Start
-                  </button>
-                )}
-              </div>
-            </div>
-          )
-        }))}
+                    {/* Actions - anchored to bottom */}
+                    <div className="flex items-center justify-between pt-2 mt-auto">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(project.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {project.status === 'active' && (
+                        <Button
+                          onClick={() => handleStartAnnotation(project)}
+                          size="sm"
+                          className="gap-1"
+                        >
+                          <Play className="w-3 h-3" />
+                          Start
+                        </Button>
+                      )}
+                      {project.status === 'paused' && (
+                        <Button
+                          onClick={() => handleStartAnnotation(project)}
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                        >
+                          <Play className="w-3 h-3" />
+                          Resume
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
+          )}
         </div>
       )}
 
-      {/* New Project Modal */}
-      {showNewProjectModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '2rem',
-            width: '100%',
-            maxWidth: '500px',
-            margin: '1rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-          }}>
-            <h2 style={{
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              color: '#111827',
-              margin: '0 0 1.5rem 0'
-            }}>
-              Create New Project
-            </h2>
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              setShowNewProjectModal(false)
-              alert('Project creation would be implemented here')
-            }}>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem'
-                }}>
-                  Project Name
-                </label>
-                <input
-                  type="text"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem'
-                  }}
-                  placeholder="Enter project name"
-                  required
-                />
+      {/* Quick Stats */}
+      {!loading && filteredProjects.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{filteredProjects.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Projects</p>
+                </div>
               </div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem'
-                }}>
-                  Description
-                </label>
-                <textarea
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    minHeight: '80px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="Describe your project"
-                />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {filteredProjects.filter(p => p.status === 'active').length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Active Projects</p>
+                </div>
               </div>
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem'
-                }}>
-                  Question Type
-                </label>
-                <select style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  backgroundColor: 'white'
-                }}>
-                  <option value="text_classification">Text Classification</option>
-                  <option value="image_classification">Image Classification</option>
-                  <option value="sentiment_analysis">Sentiment Analysis</option>
-                  <option value="named_entity_recognition">Named Entity Recognition</option>
-                  <option value="multiple_choice">Multiple Choice</option>
-                </select>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {filteredProjects.reduce((acc, p) => acc + p.completed_tasks, 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Completed Tasks</p>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    backgroundColor: '#7c3aed',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Create Project
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewProjectModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    backgroundColor: 'white',
-                    color: '#374151',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {Math.round(
+                      filteredProjects.reduce((acc, p) => {
+                        const progress = p.total_tasks > 0 ? (p.completed_tasks / p.total_tasks) * 100 : 0
+                        return acc + progress
+                      }, 0) / filteredProjects.length || 0
+                    )}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">Avg Progress</p>
+                </div>
               </div>
-            </form>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

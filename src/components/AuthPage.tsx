@@ -1,5 +1,14 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { apiClient } from '../api/client'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Alert } from './ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Separator } from './ui/separator'
+import { Badge } from './ui/badge'
+import { Eye, EyeOff, Sparkles, Zap, Shield, Database } from 'lucide-react'
 
 interface AuthPageProps {
   onAuthSuccess: () => void
@@ -9,10 +18,11 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   
   const [loginData, setLoginData] = useState({
-    email: 'admin@verita.ai',
-    password: 'admin123'
+    email: 'admin@demo.com',
+    password: 'demo123'
   })
   
   const [registerData, setRegisterData] = useState({
@@ -29,41 +39,36 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
     setError('')
 
     try {
-      console.log('Attempting login with API client...')
-      const result = await apiClient.login(loginData.email, loginData.password)
-      console.log('Login successful!', result)
-      onAuthSuccess()
-    } catch (err: any) {
-      console.error('API client login failed, trying direct fetch:', err)
-
-      // Fallback to direct fetch
-      try {
-        const formData = new URLSearchParams()
-        formData.append('username', loginData.email)
-        formData.append('password', loginData.password)
-
-        const response = await fetch('http://localhost:8000/api/v1/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData.toString()
+      // Send JSON data to match backend expectations
+      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: loginData.email,
+          password: loginData.password
         })
+      })
 
-        if (response.ok) {
-          const data = await response.json()
-          localStorage.setItem('access_token', data.access_token)
-          localStorage.setItem('refresh_token', data.refresh_token)
-          console.log('Direct fetch login successful!')
-          onAuthSuccess()
-        } else {
-          const errorData = await response.json()
-          setError(errorData.detail || 'Login failed')
-        }
-      } catch (fetchErr: any) {
-        console.error('Direct fetch also failed:', fetchErr)
-        setError('Unable to connect to server. Please check if the backend is running.')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Login successful!', data)
+        
+        // Set tokens in both localStorage and API client
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('refresh_token', data.refresh_token || '')
+        apiClient.setTokens(data.access_token, data.refresh_token || '')
+        
+        console.log('Tokens set, calling onAuthSuccess')
+        onAuthSuccess()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.detail || 'Login failed')
       }
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError('Unable to connect to server. Please check if the backend is running.')
     } finally {
       setLoading(false)
     }
@@ -87,354 +92,265 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
     }
   }
 
+  const handleSkipLogin = async () => {
+    console.log('Skip login clicked!')
+    setLoading(true)
+    setError('')
+    
+    try {
+      // Automatically login with demo credentials
+      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'admin@demo.com',
+          password: 'demo123'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Demo login successful!', data)
+        
+        // Set tokens in both localStorage and API client
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('refresh_token', data.refresh_token || '')
+        apiClient.setTokens(data.access_token, data.refresh_token || '')
+        
+        console.log('Demo tokens set, calling onAuthSuccess')
+        onAuthSuccess()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.detail || 'Demo login failed')
+      }
+    } catch (err: any) {
+      console.error('Demo login error:', err)
+      setError('Unable to connect to server for demo login.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #7c3aed 0%, #c026d3 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '16px',
-        padding: '3rem',
-        width: '100%',
-        maxWidth: '400px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-      }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem auto',
-            color: 'white',
-            fontSize: '1.5rem',
-            fontWeight: 'bold'
-          }}>
-            V
-          </div>
-          <h1 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: '700', 
-            color: '#111827',
-            margin: '0 0 0.5rem 0'
-          }}>
-            Verita AI
-          </h1>
-          <p style={{ color: '#6b7280', margin: 0 }}>
-            {isLogin ? 'Sign in to your account' : 'Create your account'}
-          </p>
-        </div>
-
-        {/* Auth Toggle */}
-        <div style={{
-          display: 'flex',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '8px',
-          padding: '4px',
-          marginBottom: '2rem'
-        }}>
-          <button
-            onClick={() => setIsLogin(true)}
-            style={{
-              flex: 1,
-              padding: '0.5rem',
-              backgroundColor: isLogin ? 'white' : 'transparent',
-              color: isLogin ? '#111827' : '#6b7280',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            style={{
-              flex: 1,
-              padding: '0.5rem',
-              backgroundColor: !isLogin ? 'white' : 'transparent',
-              color: !isLogin ? '#111827' : '#6b7280',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Sign Up
-          </button>
-        </div>
-
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            padding: '0.75rem',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            marginBottom: '1rem'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Login Form */}
-        {isLogin ? (
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={loginData.email}
-                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-                required
-              />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-20 animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
+      
+      <div className="w-full max-w-md relative z-10">
+        <Card className="bg-card/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-6 pb-8">
+            {/* Logo */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  V
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-white" />
+                </div>
+              </div>
             </div>
             
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                backgroundColor: loading ? '#9ca3af' : '#7c3aed',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease'
-              }}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        ) : (
-          /* Register Form */
-          <form onSubmit={handleRegister}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={registerData.full_name}
-                onChange={(e) => setRegisterData({ ...registerData, full_name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Username
-              </label>
-              <input
-                type="text"
-                value={registerData.username}
-                onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-                required
-              />
+            <div className="space-y-2">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Verita AI
+              </CardTitle>
+              <CardDescription className="text-base">
+                Advanced Data Annotation Platform
+              </CardDescription>
             </div>
             
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={registerData.email}
-                onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-                required
-              />
+            {/* Features badges */}
+            <div className="flex justify-center gap-2 flex-wrap">
+              <Badge variant="secondary" className="text-xs">
+                <Zap className="w-3 h-3 mr-1" />
+                AI-Powered
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                <Shield className="w-3 h-3 mr-1" />
+                Secure
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                <Database className="w-3 h-3 mr-1" />
+                Real-time
+              </Badge>
             </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <Tabs value={isLogin ? 'login' : 'register'} onValueChange={(value) => setIsLogin(value === 'login')} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-secondary/50">
+                <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
+
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <Shield className="h-4 w-4" />
+                  <div className="font-medium">Authentication Error</div>
+                  <div className="text-sm">{error}</div>
+                </Alert>
+              )}
+
+              <TabsContent value="login" className="space-y-4 mt-6">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      placeholder="admin@demo.com"
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        placeholder="Enter your password"
+                        required
+                        className="h-11 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1 h-9 w-9 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-medium"
+                  >
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="register" className="space-y-4 mt-6">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={registerData.full_name}
+                      onChange={(e) => setRegisterData({ ...registerData, full_name: e.target.value })}
+                      placeholder="Enter your full name"
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      value={registerData.username}
+                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+                      placeholder="Choose a username"
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="registerEmail">Email Address</Label>
+                    <Input
+                      id="registerEmail"
+                      type="email"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      placeholder="Enter your email"
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="registerPassword">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="registerPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        value={registerData.password}
+                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                        placeholder="Create a password"
+                        required
+                        className="h-11 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1 h-9 w-9 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-medium"
+                  >
+                    {loading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+
             
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={registerData.password}
-                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem'
-                }}
-                required
-              />
+            <div className="space-y-4">
+              <Separator className="my-6" />
+              
+              {/* Demo Section */}
+              <div className="text-center space-y-4">
+                <div className="text-xs text-muted-foreground">
+                  Demo Credentials: admin@demo.com / demo123
+                </div>
+                
+                <Button
+                  onClick={handleSkipLogin}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full border-dashed border-accent/50 text-accent hover:bg-accent/10 hover:border-accent hover:text-accent disabled:opacity-50"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  {loading ? 'Connecting to demo...' : 'Skip Login (Demo Mode)'}
+                </Button>
+              </div>
+              
+              {/* Footer */}
+              <div className="text-center text-xs text-muted-foreground">
+                Powered by modern AI technology
+              </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                backgroundColor: loading ? '#9ca3af' : '#7c3aed',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease'
-              }}
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-        )}
-
-        <div style={{
-          textAlign: 'center',
-          marginTop: '1.5rem',
-          fontSize: '0.75rem',
-          color: '#9ca3af'
-        }}>
-          Default admin: admin@verita.ai / admin123
-        </div>
-
-        {/* Test Buttons */}
-        <div style={{ textAlign: 'center', marginTop: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-          <button
-            onClick={() => {
-              console.log('Test button clicked!')
-              alert('Button click is working!')
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#059669',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            Test Click
-          </button>
-
-          <button
-            onClick={() => {
-              console.log('Skip login clicked!')
-              localStorage.setItem('access_token', 'demo-token')
-              onAuthSuccess()
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            Skip Login (Demo)
-          </button>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

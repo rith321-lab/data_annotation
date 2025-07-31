@@ -16,12 +16,16 @@ class ApiClient {
 
     // Load token from localStorage
     this.token = localStorage.getItem('access_token');
+    console.log('API Client initialized with token:', this.token ? this.token.substring(0, 20) + '...' : 'none');
 
     // Request interceptor to add auth token
     this.client.interceptors.request.use(
       (config) => {
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
+          console.log('Adding Authorization header:', `Bearer ${this.token.substring(0, 20)}...`);
+        } else {
+          console.log('No token available for request');
         }
         return config;
       },
@@ -56,6 +60,7 @@ class ApiClient {
   }
 
   setTokens(accessToken: string, refreshToken: string) {
+    console.log('Setting tokens in API client:', { accessToken: accessToken.substring(0, 20) + '...', refreshToken: refreshToken ? 'present' : 'missing' });
     this.token = accessToken;
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
@@ -79,7 +84,7 @@ class ApiClient {
       },
     });
 
-    this.setTokens(response.data.access_token, response.data.refresh_token);
+    this.setTokens(response.data.access_token, response.data.refresh_token || '');
     return response.data;
   }
 
@@ -99,7 +104,7 @@ class ApiClient {
 
   // User endpoints
   async getCurrentUser() {
-    const response = await this.client.get('/api/v1/users/me');
+    const response = await this.client.get('/api/v1/auth/me');
     return response.data;
   }
 

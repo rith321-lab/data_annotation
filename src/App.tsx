@@ -1,1047 +1,271 @@
 import { useState, useEffect } from 'react'
 import { ProjectsPage } from './components/ProjectsPage'
-import { TeamPage } from './components/TeamPage'
-import { QualityControl } from './components/QualityControl'
-import { AISuggestions } from './components/AISuggestions'
-import { ReportsPage } from './components/ReportsPage'
-import { WebhookSettings } from './components/WebhookSettings'
-import { SettingsPage } from './components/SettingsPage'
 import { AuthPage } from './components/AuthPage'
-import { apiClient } from './api/client'
+import { AnalyticsPage } from './components/AnalyticsPage'
 import { NotificationBell } from './components/NotificationCenter'
-import { CollaborationPanel } from './components/CollaborationPanel'
-import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { TaskQueue } from './components/TaskQueue'
-import { AuditTrail } from './components/AuditTrail'
-
-// Icons as simple SVG components
-const BarChart3Icon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M18 20V10M12 20V4M6 20v-6"/>
-  </svg>
-)
-
-const AwardIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
-  </svg>
-)
-
-const CreditCardIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
-  </svg>
-)
-
-const UsersIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-)
-
-const MailIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>
-  </svg>
-)
-
-const FileTextIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
-  </svg>
-)
-
-const ChevronLeftIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m15 18-6-6 6-6"/>
-  </svg>
-)
-
-const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m9 18 6-6-6-6"/>
-  </svg>
-)
-
-const SettingsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3M20.5 7.5L16 12l4.5 4.5M3.5 7.5L8 12l-4.5 4.5M20.5 16.5L16 12l4.5-4.5M3.5 16.5L8 12l-4.5-4.5"/>
-  </svg>
-)
-
-const BrainIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 2a9 9 0 0 0-9 9c0 4 3 7 5 8.5a4.5 4.5 0 0 0 4 0c2-1.5 5-4.5 5-8.5a9 9 0 0 0-9-9z"/>
-    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-    <path d="M9 9h.01M15 9h.01"/>
-  </svg>
-)
-
-const UsersConnectedIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="4"/>
-    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
-  </svg>
-)
-
-const ChartLineIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 3v18h18"/>
-    <path d="m19 9-5 5-4-4-3 3"/>
-  </svg>
-)
-
-const ListChecksIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M10 2v20M14 2v20"/>
-    <path d="M5 7h4M5 12h4M5 17h4M19 7l-2 2 2 2M19 12l-2 2 2 2M19 17l-2 2 2 2"/>
-  </svg>
-)
-
-const HistoryIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-    <path d="M3 3v5h5"/>
-    <path d="M12 7v5l4 2"/>
-  </svg>
-)
+import { ThemeToggle } from './components/ThemeToggle'
+import { apiClient } from './api/client'
+import { Button } from './components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
+import { Badge } from './components/ui/badge'
+import { Toaster } from './components/ui/sonner'
+import { cn } from './components/ui/utils'
+import { 
+  BarChart3, 
+  Users, 
+  Settings, 
+  TrendingUp, 
+  Bell, 
+  LogOut, 
+  Sparkles,
+  Database,
+  Activity,
+  Zap
+} from 'lucide-react'
 
 export default function App() {
-  const [view, setView] = useState<'home' | 'login' | 'dashboard'>('login')
-
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [view, setView] = useState<'login' | 'dashboard'>('login')
   const [activeNav, setActiveNav] = useState('Projects')
-  const [currentPage, setCurrentPage] = useState('dashboard')
-
-  // State for old login form (still referenced in the code)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   // Check if user is already logged in
   useEffect(() => {
-    if (localStorage.getItem('access_token')) {
-      setView('dashboard')
+    const checkAuth = async () => {
+      const token = localStorage.getItem('access_token')
+      const refreshToken = localStorage.getItem('refresh_token')
+      
+      if (token) {
+        try {
+          // Set tokens in API client
+          apiClient.setTokens(token, refreshToken || '')
+          const user = await apiClient.getCurrentUser()
+          setCurrentUser(user)
+          setView('dashboard')
+        } catch (error) {
+          console.error('Auth check failed:', error)
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          apiClient.clearTokens()
+        }
+      }
+      setLoading(false)
     }
+    checkAuth()
   }, [])
 
+  const handleLogout = () => {
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    apiClient.clearTokens()
+    setCurrentUser(null)
+    setView('login')
+  }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+          <div className="w-6 h-6 border-2 border-muted-foreground border-t-primary rounded-full animate-spin" />
+          <span>Loading Verita AI...</span>
+        </div>
+      </div>
+    )
+  }
 
-
-
+  // Modern Dashboard
   if (view === 'dashboard') {
     const navItems = [
-      { icon: BarChart3Icon, label: 'Projects', active: activeNav === 'Projects' },
-      { icon: AwardIcon, label: 'Qualifications' },
-      { icon: UsersIcon, label: 'Team' },
-      { icon: BrainIcon, label: 'AI Suggestions' },
-      { icon: UsersConnectedIcon, label: 'Collaboration' },
-      { icon: ChartLineIcon, label: 'Analytics' },
-      { icon: ListChecksIcon, label: 'Task Queue' },
-      { icon: HistoryIcon, label: 'Audit Trail' },
-      { icon: FileTextIcon, label: 'Reports' },
-      { icon: MailIcon, label: 'Webhooks' },
-      { icon: SettingsIcon, label: 'Settings' },
-    ]
-
-    const contributors = [
-      { initials: 'BR', name: 'Braeden R.', role: 'Project Lead', hours: 10, tasks: 3, color: '#ef4444' },
-      { initials: 'A', name: 'Alex', role: 'Data Analyst', hours: 10, tasks: 3, color: '#3b82f6' },
-      { initials: 'SM', name: 'Sarah M.', role: 'ML Engineer', hours: 10, tasks: 3, color: '#6366f1' },
-      { initials: 'MJ', name: 'Mike J.', role: 'QA Specialist', hours: 10, tasks: 3, color: '#8b5cf6' },
-      { initials: 'ES', name: 'Emma S.', role: 'Project Manager', hours: 10, tasks: 3, color: '#f59e0b' },
-      { initials: 'CL', name: 'Chris L.', role: 'Data Scientist', hours: 10, tasks: 3, color: '#ea580c' },
-      { initials: 'LK', name: 'Lisa K.', role: 'UX Researcher', hours: 10, tasks: 3, color: '#2563eb' },
-      { initials: 'TR', name: 'Tom R.', role: 'Backend Dev', hours: 10, tasks: 3, color: '#dc2626' },
-      { initials: 'AP', name: 'Anna P.', role: 'Frontend Dev', hours: 10, tasks: 3, color: '#f97316' },
-      { initials: 'DW', name: 'David W.', role: 'DevOps', hours: 10, tasks: 3, color: '#ef4444' },
-      { initials: 'ST', name: 'Sophie T.', role: 'Designer', hours: 10, tasks: 3, color: '#a855f7' },
-      { initials: 'MH', name: 'Mark H.', role: 'Tech Lead', hours: 10, tasks: 3, color: '#3b82f6' },
+      { icon: BarChart3, label: 'Projects', active: activeNav === 'Projects', description: 'Manage data labeling projects' },
+      { icon: Users, label: 'Team', active: activeNav === 'Team', description: 'Collaborate with team members' },
+      { icon: TrendingUp, label: 'Analytics', active: activeNav === 'Analytics', description: 'View insights and metrics' },
+      { icon: Settings, label: 'Settings', active: activeNav === 'Settings', description: 'Configure workspace settings' },
     ]
 
     return (
-      <div style={{ 
-        display: 'flex',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #7c3aed 0%, #c026d3 100%)',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-      }}>
-        {/* Sidebar */}
-        <div style={{
-          width: isSidebarCollapsed ? '80px' : '280px',
-          background: 'rgba(0, 0, 0, 0.2)',
-          backdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-          transition: 'width 0.3s ease',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+      <div className="flex min-h-screen bg-background">
+        {/* Modern Sidebar */}
+        <div className="w-72 bg-card/50 backdrop-blur-xl border-r border-border flex flex-col">
           {/* Logo */}
-          <div style={{ 
-            padding: '2rem',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'white',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
-                  borderRadius: '6px',
-                  transform: 'rotate(12deg)'
-                }} />
-              </div>
-              {!isSidebarCollapsed && (
-                <div>
-                  <h1 style={{ color: 'white', fontSize: '1.5rem', margin: 0 }}>
-                    Verita<sup style={{ fontSize: '0.75rem' }}>AI</sup>
-                  </h1>
-                  <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.75rem', margin: 0 }}>
-                    Design System
-                  </p>
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                  V
                 </div>
-              )}
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center">
+                  <Sparkles className="w-2 h-2 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Verita AI
+                </h1>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Database className="w-3 h-3" />
+                  Data Platform
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav style={{ flex: 1, padding: '1rem' }}>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {navItems.map((item, index) => (
-                <li key={index} style={{ marginBottom: '0.5rem' }}>
-                  <button
-                    onClick={() => {
-                      setActiveNav(item.label)
-                      if (item.label === 'Projects') {
-                        setCurrentPage('projects')
-                      } else if (item.label === 'Team') {
-                        setCurrentPage('team')
-                      } else if (item.label === 'Qualifications') {
-                        setCurrentPage('quality')
-                      } else if (item.label === 'Reports') {
-                        setCurrentPage('reports')
-                      } else if (item.label === 'Webhooks') {
-                        setCurrentPage('webhooks')
-                      } else if (item.label === 'AI Suggestions') {
-                        setCurrentPage('ai')
-                      } else if (item.label === 'Collaboration') {
-                        setCurrentPage('collaboration')
-                      } else if (item.label === 'Analytics') {
-                        setCurrentPage('analytics')
-                      } else if (item.label === 'Task Queue') {
-                        setCurrentPage('taskqueue')
-                      } else if (item.label === 'Audit Trail') {
-                        setCurrentPage('audit')
-                      } else if (item.label === 'Settings') {
-                        setCurrentPage('settings')
-                      } else {
-                        setCurrentPage('dashboard')
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: item.active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: item.active ? 'white' : 'rgba(255, 255, 255, 0.8)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      fontSize: '0.875rem',
-                      justifyContent: isSidebarCollapsed ? 'center' : 'flex-start'
-                    }}
-                    onMouseOver={(e) => {
-                      if (!item.active) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                        e.currentTarget.style.color = 'white'
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!item.active) {
-                        e.currentTarget.style.background = 'transparent'
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'
-                      }
-                    }}
+          <nav className="flex-1 p-4">
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Button
+                    key={item.label}
+                    onClick={() => setActiveNav(item.label)}
+                    variant={item.active ? "default" : "ghost"}
+                    className={cn(
+                      "w-full justify-start gap-3 h-11",
+                      item.active ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" : "hover:bg-secondary/80"
+                    )}
                   >
-                    <item.icon />
-                    {!isSidebarCollapsed && <span>{item.label}</span>}
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <Icon className="w-5 h-5" />
+                    <div className="flex-1 text-left">
+                      <div className="font-medium">{item.label}</div>
+                      <div className={cn(
+                        "text-xs",
+                        item.active ? "text-primary-foreground/80" : "text-muted-foreground"
+                      )}>
+                        {item.description}
+                      </div>
+                    </div>
+                  </Button>
+                )
+              })}
+            </div>
+            
+            {/* Quick Stats */}
+            <div className="mt-6 p-4 bg-secondary/30 rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Quick Stats</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Active Projects</span>
+                  <Badge variant="secondary">3</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Tasks</span>
+                  <Badge variant="secondary">1,247</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Completion</span>
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-600">87%</Badge>
+                </div>
+              </div>
+            </div>
           </nav>
 
-          {/* Collapse button */}
-          <div style={{ padding: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '8px',
-                color: 'rgba(255, 255, 255, 0.8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-              }}
+          {/* User Profile */}
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src="" />
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                  {currentUser?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {currentUser?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {currentUser?.email}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="w-full justify-center gap-2 hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
             >
-              {isSidebarCollapsed ? <ChevronRightIcon /> : (
-                <>
-                  <ChevronLeftIcon />
-                  <span>Collapse</span>
-                </>
-              )}
-            </button>
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </Button>
           </div>
         </div>
 
         {/* Main Content */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Header */}
-          <header style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
-            padding: '1.5rem 2rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
+        <div className="flex-1 flex flex-col">
+          {/* Modern Header */}
+          <header className="bg-card/50 backdrop-blur-xl px-8 py-6 flex justify-between items-center border-b border-border shadow-sm">
             <div>
-              <h1 style={{ 
-                color: 'white', 
-                fontSize: '2rem', 
-                margin: 0,
-                fontWeight: '600'
-              }}>
-                {activeNav}
-              </h1>
-              <p style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
-                margin: '0.25rem 0 0 0',
-                fontSize: '1rem'
-              }}>
-                {activeNav === 'Projects' ? 'Data Collection & Analysis' :
-                 activeNav === 'Team' ? 'Manage Your Team' :
-                 activeNav === 'Qualifications' ? 'Quality Control Standards' :
-                 activeNav === 'AI Suggestions' ? 'AI-Powered Assistance' :
-                 activeNav === 'Collaboration' ? 'Real-time Collaboration' :
-                 activeNav === 'Analytics' ? 'Advanced Analytics & Insights' :
-                 activeNav === 'Task Queue' ? 'Task Management & Prioritization' :
-                 activeNav === 'Audit Trail' ? 'Track Changes & Version History' :
-                 activeNav === 'Reports' ? 'Generate & Export Reports' :
-                 activeNav === 'Webhooks' ? 'Configure Integrations' :
-                 'Manage Your Workspace'}
+              <h1 className="text-3xl font-bold">{activeNav}</h1>
+              <p className="text-muted-foreground mt-1">
+                {activeNav === 'Projects' ? 'Manage your data labeling projects' :
+                 activeNav === 'Team' ? 'Collaborate with your team' :
+                 activeNav === 'Analytics' ? 'View insights and metrics' :
+                 'Configure your workspace'}
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ 
-                background: 'white', 
-                borderRadius: '8px', 
-                padding: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <NotificationBell />
-                <button
-                  onClick={() => setCurrentPage('webhooks')}
-                  style={{
-                    padding: '0.5rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    borderRadius: '6px',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = '#f3f4f6'
-                    e.currentTarget.style.color = '#111827'
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'transparent'
-                    e.currentTarget.style.color = '#6b7280'
-                  }}
-                  title="Webhook Settings"
-                >
-                  <SettingsIcon />
-                </button>
-              </div>
-              <button
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '8px',
-                  color: 'white',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-                }}
-              >
-                + New Project
-              </button>
+            <div className="flex items-center gap-3">
+              <NotificationBell />
+              <ThemeToggle />
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Zap className="w-3 h-3 mr-1" />
+                Pro Plan
+              </Badge>
             </div>
           </header>
 
-          {/* Content */}
-          <main style={{
-            flex: 1,
-            padding: '2rem',
-            overflowY: 'auto'
-          }}>
-            <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              minHeight: 'calc(100vh - 8rem)',
-              overflow: 'hidden'
-            }}>
-              {currentPage === 'projects' ? (
-                <ProjectsPage />
-              ) : currentPage === 'team' ? (
-                <TeamPage />
-              ) : currentPage === 'quality' ? (
-                <QualityControl />
-              ) : currentPage === 'reports' ? (
-                <ReportsPage />
-              ) : currentPage === 'webhooks' ? (
-                <WebhookSettings />
-              ) : currentPage === 'ai' ? (
-                <AISuggestions />
-              ) : currentPage === 'collaboration' ? (
-                <CollaborationPanel />
-              ) : currentPage === 'analytics' ? (
-                <AnalyticsDashboard />
-              ) : currentPage === 'taskqueue' ? (
-                <TaskQueue />
-              ) : currentPage === 'audit' ? (
-                <AuditTrail />
-              ) : currentPage === 'settings' ? (
-                <SettingsPage />
-              ) : (
-              <>
-            {/* Welcome Card */}
-            <div style={{
-              padding: '3rem',
-              marginBottom: '2rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'linear-gradient(135deg, #f87171, #fb923c)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    background: 'white',
-                    borderRadius: '6px'
-                  }} />
-                </div>
-                <span style={{ 
-                  color: '#1f2937',
-                  fontSize: '1.125rem',
-                  fontWeight: '500'
-                }}>
-                  Verita
-                </span>
-              </div>
-              
-              <h2 style={{ 
-                color: '#1f2937',
-                fontSize: '2rem',
-                margin: '0 0 0.5rem 0',
-                fontWeight: '600'
-              }}>
-                Welcome Aboard
-              </h2>
-              <p style={{ 
-                color: '#6b7280',
-                margin: '0 0 2rem 0',
-                fontSize: '1.125rem'
-              }}>
-                Get started with your first project
-              </p>
-              
-              <button
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  background: 'linear-gradient(135deg, #c026d3, #7c3aed)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: 'white',
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.opacity = '0.9'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.opacity = '1'
-                }}
-              >
-                Start Project
-              </button>
-            </div>
-
-            {/* Active Contributors */}
-            <div style={{
-              padding: '2rem',
-              borderTop: '1px solid #e5e7eb'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '2rem'
-              }}>
-                <h3 style={{ 
-                  color: '#1f2937',
-                  fontSize: '1.5rem',
-                  margin: 0,
-                  fontWeight: '600'
-                }}>
-                  Active Contributors
-                </h3>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <button style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#1f2937',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: '500'
-                  }}>
-                    This week
-                  </button>
-                  <button style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem'
-                  }}>
-                    All contributors
-                  </button>
-                  <button style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    fontSize: '1.25rem'
-                  }}>
-                    •••
-                  </button>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                gap: '1.5rem'
-              }}>
-                {contributors.map((contributor, i) => (
-                  <div key={i} style={{ textAlign: 'center' }}>
-                    <div style={{
-                      width: '64px',
-                      height: '64px',
-                      background: contributor.color,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto 0.75rem',
-                      color: 'white',
-                      fontSize: '1.25rem',
-                      fontWeight: '600'
-                    }}>
-                      {contributor.initials}
+          {/* Content Area */}
+          <main className="flex-1 bg-background overflow-auto">
+            {activeNav === 'Projects' && <ProjectsPage />}
+            {activeNav === 'Team' && (
+              <div className="p-8">
+                <Card className="text-center py-16">
+                  <CardHeader>
+                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <h4 style={{ 
-                      color: '#1f2937',
-                      margin: '0 0 0.25rem 0',
-                      fontSize: '0.875rem',
-                      fontWeight: '600'
-                    }}>
-                      {contributor.name}
-                    </h4>
-                    <p style={{ 
-                      color: '#6b7280',
-                      margin: '0 0 0.5rem 0',
-                      fontSize: '0.75rem'
-                    }}>
-                      {contributor.role}
-                    </p>
-                    <p style={{ 
-                      color: '#9ca3af',
-                      margin: '0',
-                      fontSize: '0.75rem'
-                    }}>
-                      {contributor.hours} hours
-                    </p>
-                    <p style={{ 
-                      color: '#9ca3af',
-                      margin: '0',
-                      fontSize: '0.75rem'
-                    }}>
-                      {contributor.tasks} active tasks
-                    </p>
-                  </div>
-                ))}
+                    <CardTitle className="text-2xl mb-2">Team Management</CardTitle>
+                    <CardDescription className="text-base">
+                      Collaborate with team members, assign roles, and manage permissions.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Badge variant="secondary">Coming Soon</Badge>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-              </>
             )}
-            </div>
+            {activeNav === 'Analytics' && <AnalyticsPage />}
+            {activeNav === 'Settings' && (
+              <div className="p-8">
+                <Card className="text-center py-16">
+                  <CardHeader>
+                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Settings className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <CardTitle className="text-2xl mb-2">Settings</CardTitle>
+                    <CardDescription className="text-base">
+                      Configure your workspace, integrations, and preferences.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Badge variant="secondary">Coming Soon</Badge>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </main>
         </div>
+        <Toaster />
       </div>
     )
   }
 
-  if (view === 'login') {
-    return (
-      <AuthPage onAuthSuccess={() => setView('dashboard')} />
-    )
-  }
-
-  // Return to home view if not authenticated
-  if (view === 'home') {
-    return (
-      <div style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#0a0a0a',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Background decoration */}
-        <div style={{
-          position: 'absolute',
-          top: '-50%',
-          right: '-20%',
-          width: '800px',
-          height: '800px',
-          background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
-          filter: 'blur(100px)'
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '-50%',
-          left: '-20%',
-          width: '600px',
-          height: '600px',
-          background: 'radial-gradient(circle, rgba(192, 38, 211, 0.3) 0%, transparent 70%)',
-          filter: 'blur(100px)'
-        }} />
-
-        <div className="animate-fadeIn" style={{ 
-          background: 'rgba(255, 255, 255, 0.03)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '3rem',
-          borderRadius: '1.5rem',
-          width: '100%',
-          maxWidth: '400px',
-          position: 'relative',
-          zIndex: 1
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ 
-              fontSize: '2rem',
-              fontWeight: '600',
-              marginBottom: '0.5rem',
-              background: 'linear-gradient(to right, #7c3aed, #a855f7)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              Welcome Back
-            </h2>
-            <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-              Sign in to your Verita AI account
-            </p>
-          </div>
-          
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ 
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.8)'
-              }}>
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '0.5rem',
-                  color: 'white',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                }}
-                required
-              />
-            </div>
-            
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{ 
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.8)'
-              }}>
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '0.5rem',
-                  color: 'white',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-                }}
-                required
-              />
-            </div>
-            
-            <button
-              type="submit"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: isLoading ? 'rgba(124, 58, 237, 0.5)' : 'linear-gradient(to right, #7c3aed, #a855f7)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                marginBottom: '1rem',
-                transition: 'opacity 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (!isLoading) e.currentTarget.style.opacity = '0.9'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.opacity = '1'
-              }}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleRegister}
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: 'transparent',
-                color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'
-                  e.currentTarget.style.color = '#a855f7'
-                }
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-                e.currentTarget.style.color = 'white'
-              }}
-            >
-              Create Account
-            </button>
-          </form>
-          
-          {message && (
-            <div className="animate-fadeIn" style={{ 
-              marginTop: '1.5rem', 
-              padding: '0.75rem',
-              background: message.includes('successful') 
-                ? 'rgba(34, 197, 94, 0.1)' 
-                : 'rgba(239, 68, 68, 0.1)',
-              border: `1px solid ${message.includes('successful') 
-                ? 'rgba(34, 197, 94, 0.3)' 
-                : 'rgba(239, 68, 68, 0.3)'}`,
-              borderRadius: '0.5rem',
-              textAlign: 'center',
-              fontSize: '0.875rem',
-              color: message.includes('successful') ? '#22c55e' : '#ef4444'
-            }}>
-              {message}
-            </div>
-          )}
-          
-          <button
-            onClick={() => setView('home')}
-            style={{
-              marginTop: '1.5rem',
-              background: 'none',
-              border: 'none',
-              color: 'rgba(255, 255, 255, 0.6)',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              width: '100%',
-              textAlign: 'center',
-              fontSize: '0.875rem'
-            }}
-          >
-            Back to Home
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Home view (landing page)
+  // Login View
   return (
-    <div style={{ 
-      minHeight: '100vh',
-      background: '#0a0a0a',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Animated background */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(192, 38, 211, 0.15) 0%, transparent 50%)',
-        filter: 'blur(100px)'
-      }} />
-      
-      {/* Header */}
-      <header style={{
-        position: 'relative',
-        zIndex: 10,
-        padding: '2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        maxWidth: '1400px',
-        margin: '0 auto'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-            borderRadius: '0.75rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem'
-          }}>
-            V
-          </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white' }}>Verita AI</span>
-        </div>
-        
-        <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#features" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Features</a>
-          <a href="#pricing" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Pricing</a>
-          <a href="http://localhost:8000/docs" target="_blank" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>API Docs</a>
-          <button
-            onClick={() => setView('login')}
-            style={{
-              padding: '0.5rem 1.5rem',
-              background: 'linear-gradient(to right, #7c3aed, #a855f7)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: '500',
-              transition: 'opacity 0.2s'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.opacity = '0.9'
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.opacity = '1'
-            }}
-          >
-            Get Started
-          </button>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <main style={{
-        position: 'relative',
-        zIndex: 10,
-        padding: '4rem 2rem',
-        maxWidth: '1400px',
-        margin: '0 auto',
-        textAlign: 'center'
-      }}>
-        <div className="animate-fadeIn">
-          <h1 style={{ 
-            fontSize: 'clamp(3rem, 8vw, 5rem)',
-            fontWeight: '700',
-            marginBottom: '1.5rem',
-            lineHeight: '1.1',
-            color: 'white'
-          }}>
-            <span style={{
-              background: 'linear-gradient(to right, #7c3aed, #a855f7, #c026d3)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              AI-Powered
-            </span>
-            <br />
-            Data Labeling Platform
-          </h1>
-          
-          <p style={{ 
-            fontSize: '1.25rem',
-            color: 'rgba(255, 255, 255, 0.7)',
-            marginBottom: '3rem',
-            maxWidth: '600px',
-            margin: '0 auto 3rem'
-          }}>
-            Build high-quality training data with our advanced labeling tools, 
-            quality control, and workforce management platform.
-          </p>
-          
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
-            <button
-              onClick={() => setView('login')}
-              style={{
-                padding: '1rem 2rem',
-                background: 'linear-gradient(to right, #7c3aed, #a855f7)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontSize: '1.125rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'transform 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-            >
-              Start Free Trial
-            </button>
-            <a
-              href="http://localhost:8000/docs"
-              target="_blank"
-              style={{
-                padding: '1rem 2rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                fontSize: '1.125rem',
-                fontWeight: '500',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-            >
-              View Demo
-            </a>
-          </div>
-        </div>
-      </main>
-    </div>
+    <AuthPage onAuthSuccess={() => {
+      setView('dashboard')
+    }} />
   )
 }
