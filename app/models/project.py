@@ -94,5 +94,7 @@ class Project(Base):
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
     webhook_events = relationship("WebhookEvent", back_populates="project")
     
+
+    
     def __repr__(self):
         return f"<Project {self.name}>"

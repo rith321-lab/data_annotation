@@ -2,10 +2,12 @@ from typing import Any, List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, distinct
 
 from app.core.deps import get_current_active_user, get_db
 from app.models.user import User
 from app.models.project import Project as ProjectModel, ProjectStatus
+from app.models.worker import WorkerAssignment
 from app.schemas.project import (
     Project, ProjectCreate, ProjectUpdate, ProjectWithStats, ProjectActionResponse
 )
@@ -25,7 +27,15 @@ async def create_project(
     if not current_user.organization_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User must belong to an organization"
+            detail="You must create or join an organization before creating projects. Please go to the Organization page to create one."
+        )
+    
+    # Check permissions using new permission system
+    from app.core.permissions import can_create_project
+    if not await can_create_project(db, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create projects. You must be a member of a team that allows project creation."
         )
     
     project = await ProjectService.create(
@@ -88,11 +98,22 @@ async def get_project(
         else 0.0
     )
     
+    # Calculate active workers (workers with active assignments for this project)
+    active_workers_result = await db.execute(
+        select(func.count(distinct(WorkerAssignment.worker_id)))
+        .join(WorkerAssignment.task)
+        .where(
+            WorkerAssignment.task.has(project_id=project_id),
+            WorkerAssignment.status.in_(["assigned", "in_progress"])
+        )
+    )
+    active_workers = active_workers_result.scalar() or 0
+    
     return ProjectWithStats(
         **project.__dict__,
         completion_rate=completion_rate,
         pending_tasks=pending_tasks,
-        active_workers=0  # TODO: Calculate from active assignments
+        active_workers=active_workers
     )
 
 
@@ -136,14 +157,12 @@ async def delete_project(
             detail="Project not found"
         )
     
-    # Check permissions (only creator or admin can delete)
-    if (
-        project.creator_id != current_user.id
-        and not current_user.is_superuser
-    ):
+    # Check permissions using new permission system
+    from app.core.permissions import can_delete_project
+    if not await can_delete_project(db, current_user, str(project_id)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Not enough permissions. Superusers can delete any project, regular users can only delete projects in their organization if they're team OWNER/ADMIN."
         )
     
     await ProjectService.delete(db, project)

@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, UUID4, Field, field_serializer, model_validator
 from datetime import datetime
 
 from app.models.project import ProjectStatus, ProjectType
@@ -64,18 +64,65 @@ class ProjectInDBBase(ProjectBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
+
+    
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class Project(ProjectInDBBase):
-    pass
+    @model_validator(mode='before')
+    @classmethod
+    def handle_metadata_mapping(cls, data):
+        # Handle SQLAlchemy object conversion
+        if hasattr(data, '__dict__'):
+            # Convert SQLAlchemy object to dict
+            obj_dict = {}
+            for key, value in data.__dict__.items():
+                if not key.startswith('_'):  # Skip SQLAlchemy internal attributes
+                    obj_dict[key] = value
+            
+            # Map project_metadata to metadata
+            if 'project_metadata' in obj_dict:
+                obj_dict['metadata'] = obj_dict['project_metadata']
+            
+            return obj_dict
+        elif isinstance(data, dict):
+            # Already a dict, just map if needed
+            if 'project_metadata' in data:
+                data['metadata'] = data['project_metadata']
+            return data
+        return data
 
 
 class ProjectWithStats(ProjectInDBBase):
     completion_rate: float = 0.0
     active_workers: int = 0
     pending_tasks: int = 0
+    
+    @model_validator(mode='before')
+    @classmethod
+    def handle_metadata_mapping(cls, data):
+        # Handle SQLAlchemy object conversion
+        if hasattr(data, '__dict__'):
+            # Convert SQLAlchemy object to dict
+            obj_dict = {}
+            for key, value in data.__dict__.items():
+                if not key.startswith('_'):  # Skip SQLAlchemy internal attributes
+                    obj_dict[key] = value
+            
+            # Map project_metadata to metadata
+            if 'project_metadata' in obj_dict:
+                obj_dict['metadata'] = obj_dict['project_metadata']
+            
+            return obj_dict
+        elif isinstance(data, dict):
+            # Already a dict, just map if needed
+            if 'project_metadata' in data:
+                data['metadata'] = data['project_metadata']
+            return data
+        return data
 
 
 class ProjectActionResponse(BaseModel):

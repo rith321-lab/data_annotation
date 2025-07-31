@@ -61,6 +61,35 @@ logs/
 debug.html
 debug_agents/reports/
 
+# Development
+*.map
+.nyc_output
+coverage/
+.parcel-cache/
+*.tsbuildinfo
+
+# Production builds
+build/
+dist/
+.next/
+out/
+
 # Dependencies
 package-lock.json
 yarn.lock
+
+# AI/ML Models
+models/
+*.pkl
+*.h5
+*.onnx
+
+# Data files
+data/
+datasets/
+uploads/
+exports/
+
+# Configuration
+.env.production
+.env.staging

@@ -20,7 +20,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { login, isLoading, error } = useAuthStore()
+  const { login, isLoading, error, clearError } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
 
   const {
@@ -32,12 +32,14 @@ export function LoginPage() {
   })
 
   const onSubmit = async (data: LoginFormData) => {
+    clearError() // Clear any previous errors
     try {
       await login(data.email, data.password)
       toast.success('Login successful!')
       navigate('/projects')
-    } catch (error) {
-      toast.error('Login failed. Please check your credentials.')
+    } catch (error: any) {
+      // The error is already set in the auth store, just show a toast
+      toast.error(error.response?.data?.detail || 'Login failed. Please check your credentials.')
     }
   }
 
@@ -66,6 +68,10 @@ export function LoginPage() {
                 placeholder="name@example.com"
                 {...register('email')}
                 disabled={isLoading}
+                onChange={(e) => {
+                  register('email').onChange(e)
+                  if (error) clearError() // Clear errors when user starts typing
+                }}
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -79,6 +85,10 @@ export function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   disabled={isLoading}
+                  onChange={(e) => {
+                    register('password').onChange(e)
+                    if (error) clearError() // Clear errors when user starts typing
+                  }}
                 />
                 <button
                   type="button"

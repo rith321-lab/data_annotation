@@ -49,59 +49,160 @@ export function ProjectsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-500'
-      case 'active': return 'bg-green-500'
-      case 'paused': return 'bg-yellow-500'
-      case 'completed': return 'bg-blue-500'
-      case 'cancelled': return 'bg-red-500'
-      default: return 'bg-gray-500'
+      case 'draft': return 'var(--text-muted)'
+      case 'active': return 'var(--success)'
+      case 'paused': return 'var(--warning)'
+      case 'completed': return 'var(--info)'
+      case 'cancelled': return 'var(--error)'
+      default: return 'var(--text-muted)'
+    }
+  }
+
+  const getStatusBg = (status: string) => {
+    switch (status) {
+      case 'draft': return 'rgba(136, 136, 136, 0.1)'
+      case 'active': return 'rgba(40, 167, 69, 0.1)'
+      case 'paused': return 'rgba(255, 193, 7, 0.1)'
+      case 'completed': return 'rgba(23, 162, 184, 0.1)'
+      case 'cancelled': return 'rgba(220, 53, 69, 0.1)'
+      default: return 'rgba(136, 136, 136, 0.1)'
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-white">Loading projects...</div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '50vh'
+      }}>
+        <div className="loading" style={{
+          color: 'var(--text-primary)',
+          fontSize: 'var(--body-large)'
+        }}>
+          Loading projects...
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="fade-in" style={{ padding: 0 }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="content-header" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 'var(--margin-lg)',
+        paddingBottom: 'var(--padding-md)',
+        borderBottom: '1px solid var(--border-primary)'
+      }}>
         <div>
-          <h1 className="text-3xl font-bold text-white">Projects</h1>
-          <p className="text-white/60 mt-1">Manage your data labeling projects</p>
+          <h1 style={{
+            fontSize: 'var(--h1-size)',
+            fontWeight: 'var(--h1-weight)',
+            color: 'var(--text-primary)',
+            margin: 0,
+            marginBottom: 'var(--space-2)'
+          }}>
+            Projects
+          </h1>
+          <p style={{
+            fontSize: 'var(--body-large)',
+            color: 'var(--text-secondary)',
+            margin: 0
+          }}>
+            Manage your data labeling projects
+          </p>
         </div>
-        <Button
+        <button
           onClick={() => navigate('/projects/new')}
-          className="bg-purple-600 hover:bg-purple-700"
+          className="btn btn-primary interactive"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            padding: 'var(--space-3) var(--space-6)',
+            background: 'var(--accent-primary)',
+            color: 'var(--text-primary)',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            fontSize: 'var(--button-size)',
+            fontWeight: 'var(--button-weight)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
         >
-          <Plus className="mr-2" size={20} />
+          <Plus size={20} />
           New Project
-        </Button>
+        </button>
       </div>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+        gap: 'var(--space-6)'
+      }}>
         {projects.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FolderOpen size={32} className="text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-              <p className="text-gray-600 mb-4">Create your first project to get started</p>
-              <Button
-                onClick={() => navigate('/projects/new')}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Plus className="mr-2" size={20} />
-                Create Project
-              </Button>
-            </CardContent>
-          </Card>
+          <div style={{
+            gridColumn: '1 / -1',
+            background: 'var(--secondary-bg)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--padding-xl)',
+            textAlign: 'center' as const
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              background: 'var(--surface-bg)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto var(--margin-md) auto'
+            }}>
+              <FolderOpen size={32} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <h3 style={{
+              fontSize: 'var(--h4-size)',
+              fontWeight: 'var(--h4-weight)',
+              color: 'var(--text-primary)',
+              margin: '0 0 var(--space-2) 0'
+            }}>
+              No projects yet
+            </h3>
+            <p style={{
+              fontSize: 'var(--body-base)',
+              color: 'var(--text-secondary)',
+              margin: '0 0 var(--margin-md) 0'
+            }}>
+              Create your first project to get started
+            </p>
+            <button
+              onClick={() => navigate('/projects/new')}
+              className="btn btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                padding: 'var(--space-3) var(--space-5)',
+                background: 'var(--accent-primary)',
+                color: 'var(--text-primary)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--button-size)',
+                fontWeight: 'var(--button-weight)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Plus size={20} />
+              Create Project
+            </button>
+          </div>
         ) : (
           projects.map((project) => {
             const completionRate = project.total_tasks > 0 
@@ -109,29 +210,78 @@ export function ProjectsPage() {
               : 0
 
             return (
-              <Card 
+              <div 
                 key={project.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
+                className="card card-interactive"
+                style={{
+                  background: 'var(--secondary-bg)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: 'var(--padding-lg)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative' as const
+                }}
                 onClick={() => navigate(`/projects/${project.id}`)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
-                      <Badge 
-                        className={`${getStatusColor(project.status)} text-white mt-2`}
-                      >
-                        {project.status}
-                      </Badge>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal size={16} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => {
+                {/* Status Indicator */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '4px',
+                  height: '100%',
+                  background: getStatusColor(project.status),
+                  borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)'
+                }}></div>
+
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  marginBottom: 'var(--space-4)'
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontSize: 'var(--h4-size)',
+                      fontWeight: 'var(--h4-weight)',
+                      color: 'var(--text-primary)',
+                      margin: '0 0 var(--space-2) 0',
+                      lineHeight: 'var(--line-height-tight)'
+                    }}>
+                      {project.name}
+                    </h3>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: 'var(--space-1) var(--space-3)',
+                      background: getStatusBg(project.status),
+                      color: getStatusColor(project.status),
+                      fontSize: 'var(--body-xs)',
+                      fontWeight: '600',
+                      borderRadius: 'var(--radius-pill)',
+                      textTransform: 'capitalize' as const
+                    }}>
+                      {project.status}
+                    </span>
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <button style={{
+                        padding: 'var(--space-2)',
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: 'var(--radius-sm)',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        transition: 'all 0.2s ease'
+                      }}>
+                        <MoreHorizontal size={16} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                                              <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation()
                           navigate(`/projects/${project.id}`)
                         }}>
@@ -141,72 +291,154 @@ export function ProjectsPage() {
                           e.stopPropagation()
                           navigate(`/projects/${project.id}/tasks`)
                         }}>
-                          View Tasks
+                          Manage Tasks
                         </DropdownMenuItem>
-                        {project.status === 'draft' && (
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation()
-                            handleProjectAction('launch', project.id)
-                          }}>
-                            <Play className="mr-2" size={16} />
-                            Launch Project
-                          </DropdownMenuItem>
-                        )}
-                        {project.status === 'active' && (
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation()
-                            handleProjectAction('pause', project.id)
-                          }}>
-                            <Pause className="mr-2" size={16} />
-                            Pause Project
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem 
-                          className="text-red-600"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleProjectAction('delete', project.id)
-                          }}
-                        >
-                          Delete Project
+                      {project.status === 'draft' && (
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation()
+                          handleProjectAction('launch', project.id)
+                        }}>
+                          <Play className="mr-2" size={16} />
+                          Launch Project
                         </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      )}
+                      {project.status === 'active' && (
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation()
+                          handleProjectAction('pause', project.id)
+                        }}>
+                          <Pause className="mr-2" size={16} />
+                          Pause Project
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem 
+                        className="text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleProjectAction('delete', project.id)
+                        }}
+                      >
+                        Delete Project
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Description */}
+                <p style={{
+                  fontSize: 'var(--body-small)',
+                  color: 'var(--text-secondary)',
+                  margin: '0 0 var(--margin-md) 0',
+                  lineHeight: 'var(--line-height-base)',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}>
+                  {project.description || project.instructions}
+                </p>
+                
+                {/* Progress Section */}
+                <div style={{ marginBottom: 'var(--space-4)' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 'var(--space-2)'
+                  }}>
+                    <span style={{
+                      fontSize: 'var(--body-small)',
+                      color: 'var(--text-muted)',
+                      fontWeight: '500'
+                    }}>
+                      Progress
+                    </span>
+                    <span style={{
+                      fontSize: 'var(--body-small)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '600'
+                    }}>
+                      {completionRate.toFixed(0)}%
+                    </span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">
-                    {project.description || project.instructions}
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    background: 'var(--surface-bg)',
+                    borderRadius: 'var(--radius-pill)',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${completionRate}%`,
+                      height: '100%',
+                      background: getStatusColor(project.status),
+                      borderRadius: 'var(--radius-pill)',
+                      transition: 'width 0.3s ease'
+                    }}></div>
+                  </div>
+                </div>
+                
+                {/* Stats Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--space-4)',
+                  marginBottom: 'var(--space-4)'
+                }}>
+                  <div>
+                    <span style={{
+                      fontSize: 'var(--body-xs)',
+                      color: 'var(--text-muted)',
+                      fontWeight: '500',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Tasks
+                    </span>
+                    <div style={{
+                      fontSize: 'var(--body-base)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '600',
+                      marginTop: 'var(--space-1)'
+                    }}>
+                      {project.total_tasks}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{
+                      fontSize: 'var(--body-xs)',
+                      color: 'var(--text-muted)',
+                      fontWeight: '500',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Completed
+                    </span>
+                    <div style={{
+                      fontSize: 'var(--body-base)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '600',
+                      marginTop: 'var(--space-1)'
+                    }}>
+                      {project.completed_tasks}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Footer */}
+                <div style={{
+                  paddingTop: 'var(--space-3)',
+                  borderTop: '1px solid var(--border-primary)'
+                }}>
+                  <p style={{
+                    fontSize: 'var(--body-xs)',
+                    color: 'var(--text-muted)',
+                    margin: 0
+                  }}>
+                    Created {format(new Date(project.created_at), 'MMM d, yyyy')}
                   </p>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">{completionRate.toFixed(0)}%</span>
-                      </div>
-                      <Progress value={completionRate} className="h-2" />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-gray-600">Tasks:</span>
-                        <span className="ml-2 font-medium">{project.total_tasks}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Completed:</span>
-                        <span className="ml-2 font-medium">{project.completed_tasks}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-gray-500">
-                        Created {format(new Date(project.created_at), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )
           })
         )}

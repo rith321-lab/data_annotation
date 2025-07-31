@@ -7,7 +7,7 @@ import { ReportsPage } from './components/ReportsPage'
 import { WebhookSettings } from './components/WebhookSettings'
 import { SettingsPage } from './components/SettingsPage'
 import { AuthPage } from './components/AuthPage'
-import { apiClient } from './api/client'
+// import { apiClient } from './api/client' // Removed to fix unused import warning
 import { NotificationBell } from './components/NotificationCenter'
 import { CollaborationPanel } from './components/CollaborationPanel'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
@@ -27,11 +27,7 @@ const AwardIcon = () => (
   </svg>
 )
 
-const CreditCardIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
-  </svg>
-)
+
 
 const UsersIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -113,6 +109,12 @@ export default function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [activeNav, setActiveNav] = useState('Projects')
   const [currentPage, setCurrentPage] = useState('dashboard')
+  
+  // Auth form state
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
   // Check if user is already logged in
   useEffect(() => {

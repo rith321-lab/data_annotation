@@ -9,9 +9,12 @@ import { useAuthStore } from './stores/authStore'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { DashboardLayout } from './layouts/DashboardLayout'
+import { DashboardPage } from './pages/DashboardPage'
 import { ProjectsPage } from './pages/ProjectsPage'
+import { ProjectCreatePage } from './pages/ProjectCreatePage'
 import { ProjectDetailPage } from './pages/ProjectDetailPage'
 import { TasksPage } from './pages/TasksPage'
+import { OrganizationPage } from './pages/OrganizationPage'
 import { SettingsPage } from './pages/SettingsPage'
 
 const queryClient = new QueryClient()
@@ -51,10 +54,13 @@ export default function App() {
               <DashboardLayout />
             </PrivateRoute>
           }>
-            <Route index element={<Navigate to="/projects" />} />
+            <Route index element={<DashboardPage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="projects" element={<ProjectsPage />} />
+            <Route path="projects/new" element={<ProjectCreatePage />} />
             <Route path="projects/:projectId" element={<ProjectDetailPage />} />
             <Route path="projects/:projectId/tasks" element={<TasksPage />} />
+            <Route path="organization" element={<OrganizationPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>

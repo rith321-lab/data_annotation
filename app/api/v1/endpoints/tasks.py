@@ -26,18 +26,12 @@ async def create_task(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Create a new task for a project"""
-    # Check project exists and user has access
-    project = await ProjectService.get(db, project_id=project_id)
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found"
-        )
-    
-    if project.organization_id != current_user.organization_id:
+    # Check permissions using new permission system
+    from app.core.permissions import can_create_task
+    if not await can_create_task(db, current_user, str(project_id)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Not enough permissions to create tasks. You must be in a team that allows project creation and the project must be in your organization."
         )
     
     task = await TaskService.create(db, obj_in=task_in, project_id=project_id)
@@ -52,18 +46,12 @@ async def create_tasks_bulk(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Create multiple tasks for a project"""
-    # Check project exists and user has access
-    project = await ProjectService.get(db, project_id=project_id)
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found"
-        )
-    
-    if project.organization_id != current_user.organization_id:
+    # Check permissions using new permission system
+    from app.core.permissions import can_create_task
+    if not await can_create_task(db, current_user, str(project_id)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Not enough permissions to create tasks. You must be in a team that allows project creation and the project must be in your organization."
         )
     
     tasks = await TaskService.create_many(
@@ -80,18 +68,12 @@ async def upload_tasks_csv(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Upload tasks via CSV file"""
-    # Check project exists and user has access
-    project = await ProjectService.get(db, project_id=project_id)
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found"
-        )
-    
-    if project.organization_id != current_user.organization_id:
+    # Check permissions using new permission system
+    from app.core.permissions import can_create_task
+    if not await can_create_task(db, current_user, str(project_id)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Not enough permissions to create tasks. You must be in a team that allows project creation and the project must be in your organization."
         )
     
     # Read CSV file

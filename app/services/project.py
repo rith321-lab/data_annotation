@@ -33,6 +33,11 @@ class ProjectService:
         
         # Create project
         project_data = obj_in.model_dump(exclude={"team_ids"})
+        
+        # Handle metadata field mapping (metadata -> project_metadata)  
+        if "metadata" in project_data:
+            project_data["project_metadata"] = project_data.pop("metadata")
+        
         db_project = Project(
             **project_data,
             creator_id=creator_id,
@@ -98,6 +103,10 @@ class ProjectService:
         obj_in: ProjectUpdate
     ) -> Project:
         update_data = obj_in.model_dump(exclude_unset=True)
+        
+        # Handle metadata field mapping (metadata -> project_metadata)
+        if "metadata" in update_data:
+            update_data["project_metadata"] = update_data.pop("metadata")
         
         for field, value in update_data.items():
             setattr(db_obj, field, value)

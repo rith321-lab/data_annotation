@@ -32,10 +32,15 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (error.response?.status === 401) {
-          // Try to refresh token
+        // Don't try to refresh tokens for login/register endpoints
+        const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
+                              error.config?.url?.includes('/auth/register');
+        
+        if (error.response?.status === 401 && !isAuthEndpoint) {
+          // Only try to refresh token if this is not a login/register request
           const refreshToken = localStorage.getItem('refresh_token');
-          if (refreshToken) {
+          if (refreshToken && !error.config._retry) {
+            error.config._retry = true; // Prevent infinite retry loops
             try {
               const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {
                 refresh_token: refreshToken,
@@ -46,6 +51,15 @@ class ApiClient {
               return this.client.request(error.config);
             } catch (refreshError) {
               this.clearTokens();
+              // Only redirect if we're not already on login page
+              if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+              }
+            }
+          } else if (!refreshToken) {
+            // No refresh token available, go to login
+            this.clearTokens();
+            if (!window.location.pathname.includes('/login')) {
               window.location.href = '/login';
             }
           }
@@ -198,9 +212,101 @@ class ApiClient {
     return response.data;
   }
 
+  async updateTask(taskId: string, data: any) {
+    const response = await this.client.put(`/api/v1/tasks/${taskId}`, data);
+    return response.data;
+  }
+
+  async deleteTask(taskId: string) {
+    const response = await this.client.delete(`/api/v1/tasks/${taskId}`);
+    return response.data;
+  }
+
   // Question endpoints
   async addQuestion(projectId: string, data: any) {
     const response = await this.client.post(`/api/v1/projects/${projectId}/questions`, data);
+    return response.data;
+  }
+
+  // Organization endpoints
+  async createOrganization(data: any) {
+    const response = await this.client.post('/api/v1/organizations', data);
+    return response.data;
+  }
+
+  async getCurrentOrganization() {
+    const response = await this.client.get('/api/v1/organizations/me');
+    return response.data;
+  }
+
+  async updateOrganization(data: any) {
+    const response = await this.client.put('/api/v1/organizations/me', data);
+    return response.data;
+  }
+
+  async getOrganizationMembers() {
+    const response = await this.client.get('/api/v1/organizations/members');
+    return response.data;
+  }
+
+  async inviteUserToOrganization(data: { email: string; team_id: string; role: string }) {
+    const response = await this.client.post('/api/v1/organizations/invite', data);
+    return response.data;
+  }
+
+  async removeUserFromOrganization(userId: string) {
+    const response = await this.client.delete(`/api/v1/organizations/members/${userId}`);
+    return response.data;
+  }
+
+  async getOrganization(organizationId: string) {
+    const response = await this.client.get(`/api/v1/organizations/${organizationId}`);
+    return response.data;
+  }
+
+  // Team endpoints
+  async getOrganizationTeams() {
+    const response = await this.client.get('/api/v1/teams/');
+    return response.data;
+  }
+
+  async createTeam(data: any) {
+    const response = await this.client.post('/api/v1/teams/', data);
+    return response.data;
+  }
+
+  async getTeam(teamId: string) {
+    const response = await this.client.get(`/api/v1/teams/${teamId}`);
+    return response.data;
+  }
+
+  async updateTeam(teamId: string, data: any) {
+    const response = await this.client.put(`/api/v1/teams/${teamId}`, data);
+    return response.data;
+  }
+
+  async deleteTeam(teamId: string) {
+    const response = await this.client.delete(`/api/v1/teams/${teamId}`);
+    return response.data;
+  }
+
+  async getTeamMembers(teamId: string) {
+    const response = await this.client.get(`/api/v1/teams/${teamId}/members`);
+    return response.data;
+  }
+
+  async addTeamMember(teamId: string, data: { user_id: string; role: string }) {
+    const response = await this.client.post(`/api/v1/teams/${teamId}/members`, data);
+    return response.data;
+  }
+
+  async updateTeamMember(teamId: string, memberId: string, data: { role: string }) {
+    const response = await this.client.put(`/api/v1/teams/${teamId}/members/${memberId}`, data);
+    return response.data;
+  }
+
+  async removeTeamMember(teamId: string, memberId: string) {
+    const response = await this.client.delete(`/api/v1/teams/${teamId}/members/${memberId}`);
     return response.data;
   }
 }

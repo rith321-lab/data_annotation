@@ -29,3 +29,30 @@ opentelemetry-api==1.22.0
 opentelemetry-sdk==1.22.0
 opentelemetry-instrumentation-fastapi==0.43b0
 python-dotenv==1.0.0
+prometheus-fastapi-instrumentator
+email-validator
+deepdiff
+greenlet
+
+# AI/ML Dependencies for Suggestions System
+scikit-learn==1.3.2
+transformers==4.36.2
+torch==2.1.2
+tokenizers==0.15.0
+pillow==10.2.0
+opencv-python==4.9.0.80
+
+# File Processing
+python-magic==0.4.27
+openpyxl==3.1.2
+
+# Background Tasks & Queuing
+dramatiq==1.15.0
+
+# Real-time Features
+websockets==12.0
+fastapi-websocket-pubsub==0.3.2
+
+# Additional Data Processing
+jsonschema==4.20.0
+python-dateutil==2.8.2

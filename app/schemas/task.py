@@ -64,10 +64,9 @@ class TaskWithResponses(TaskInDBBase):
 class TaskStats(BaseModel):
     total_tasks: int
     pending_tasks: int
+    assigned_tasks: int
     in_progress_tasks: int
     completed_tasks: int
-    needs_review_tasks: int
     rejected_tasks: int
-    expired_tasks: int
+    completion_rate: float
     average_completion_time: Optional[float] = None
-    average_consensus_score: Optional[float] = None

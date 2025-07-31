@@ -28,15 +28,28 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS_STR: str = "http://localhost:3000,http://localhost:8000"
     
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    @property
+    def BACKEND_CORS_ORIGINS(self) -> List[str]:
+        """Parse CORS origins from string - supports both comma-separated and JSON array formats"""
+        value = self.BACKEND_CORS_ORIGINS_STR
+        
+        if not value:
+            return []
+            
+        # Handle JSON array format: ["url1", "url2"]
+        if value.strip().startswith('[') and value.strip().endswith(']'):
+            import json
+            try:
+                origins = json.loads(value)
+                return [str(origin).rstrip('/') for origin in origins]
+            except json.JSONDecodeError:
+                pass
+        
+        # Handle comma-separated format: url1,url2
+        origins = [url.strip().rstrip('/') for url in value.split(',') if url.strip()]
+        return origins
     
     # AWS S3
     AWS_ACCESS_KEY_ID: Optional[str] = None
@@ -76,6 +89,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 
 settings = Settings()

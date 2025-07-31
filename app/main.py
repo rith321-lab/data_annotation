@@ -36,7 +36,7 @@ if settings.BACKEND_CORS_ORIGINS:
 # Trusted host middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*.verita.ai", "localhost", "127.0.0.1"]
+    allowed_hosts=["*.verita.ai", "localhost", "127.0.0.1", "0.0.0.0"]
 )
 
 # Prometheus metrics

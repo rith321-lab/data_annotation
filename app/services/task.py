@@ -226,16 +226,19 @@ class TaskService:
         )
         row = result.one()
         
+        total_tasks = sum(status_counts.values())
+        completed_tasks = status_counts.get(TaskStatus.COMPLETED.value, 0)
+        completion_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0.0
+        
         return {
-            "total_tasks": sum(status_counts.values()),
+            "total_tasks": total_tasks,
             "pending_tasks": status_counts.get(TaskStatus.PENDING.value, 0),
+            "assigned_tasks": status_counts.get(TaskStatus.IN_PROGRESS.value, 0),
             "in_progress_tasks": status_counts.get(TaskStatus.IN_PROGRESS.value, 0),
-            "completed_tasks": status_counts.get(TaskStatus.COMPLETED.value, 0),
-            "needs_review_tasks": status_counts.get(TaskStatus.NEEDS_REVIEW.value, 0),
+            "completed_tasks": completed_tasks,
             "rejected_tasks": status_counts.get(TaskStatus.REJECTED.value, 0),
-            "expired_tasks": status_counts.get(TaskStatus.EXPIRED.value, 0),
-            "average_completion_time": row.avg_time,
-            "average_consensus_score": row.avg_consensus
+            "completion_rate": completion_rate,
+            "average_completion_time": row.avg_time
         }
     
     @staticmethod
